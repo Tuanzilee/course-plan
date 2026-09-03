@@ -2,6 +2,8 @@
 
 單頁 HTML + JSON 的自用畢業學分規劃工具。手機、電腦都能開。
 
+**線上版：<https://tuanzilee.github.io/course-plan/>**
+
 ## 是什麼
 
 回答四個問題：
@@ -13,6 +15,8 @@
 
 ## 怎麼跑
 
+平常直接開線上版就好。要在本機改東西時：
+
 ```bash
 cd ~/Desktop/course && python3 -m http.server 4173
 ```
@@ -20,7 +24,14 @@ cd ~/Desktop/course && python3 -m http.server 4173
 然後開 <http://localhost:4173>。
 
 > 不能直接雙擊 `index.html`：頁面用 `fetch` 讀 JSON，`file://` 會被瀏覽器擋掉。
-> 部署到 GitHub Pages 後就沒這問題。
+
+改完部署：
+
+```bash
+git push origin pages-main:main
+```
+
+> 這是公開 repo，`data/` 不得出現姓名、學號等個資。細節見 `CLAUDE.md`。
 
 ## 檔案結構
 
