@@ -1,0 +1,86 @@
+{
+  "student": {
+    "dept": "輔仁大學心理學系",
+    "entry": "115 學年度轉入二年級（轉學生）",
+    "cohortRules": "114",
+    "yearsAllowed": 3,
+    "prevCredits": 72
+  },
+
+  "scenarios": [
+    { "id": "planA", "name": "Plan A：抵免核准", "desc": "逾十年課程專案核准，表 A／B／C 全數抵免認列通過。週三時段修社會學。", "pendingAs": "approved" },
+    { "id": "planB", "name": "Plan B：抵免未過", "desc": "逾十年專案未核准，前修科目須全數重修。週三時段改修統計學。", "pendingAs": "rejected" }
+  ],
+
+  "waivers": [
+    { "course": "01190", "type": "prereq", "status": "approved", "note": "心理測驗擋修（統計學 6 學分）系主任已放行，與抵免申請結果無關" },
+    { "course": "07943", "type": "prereq", "status": "approved", "note": "心理學實驗法擋修（統計學 6 學分）系主任已放行，與抵免申請結果無關" }
+  ],
+
+  "transfer": {
+    "status": "pending",
+    "submitted": "2026-09-01 正式親送系主任提出申請",
+    "note": "系主任已先行看過檔案未表示反對，但不等於正式核可。2026-09-03 確認仍在審核中。",
+    "items": [
+      { "table": "A", "type": "抵免", "from": "普通心理學", "credits": 6, "bucket": "dept_core", "satisfies": ["00042-1", "00042-2"], "status": "pending" },
+      { "table": "A", "type": "抵免", "from": "心理及教育統計學", "credits": 6, "bucket": "dept_core", "satisfies": ["02222-1", "02222-2"], "status": "pending" },
+
+      { "table": "B", "type": "認列", "from": "國文", "credits": 4, "bucket": "hol_basic", "satisfies": ["00001-1", "00001-2"], "status": "pending" },
+      { "table": "B", "type": "認列", "from": "英文（一）讀本＋語練", "credits": 4, "bucket": "hol_basic", "satisfies": ["FL-1", "FL-2"], "status": "pending" },
+      { "table": "B", "type": "認列", "from": "資訊概論", "credits": 0, "bucket": "hol_basic", "satisfies": ["IT"], "status": "pending", "note": "資訊素養為檢定制，0 學分" },
+      { "table": "B", "type": "認列", "from": "西方歷史與人文", "credits": 2, "bucket": "hol_ge", "geDomain": "ge_hum", "status": "pending" },
+      { "table": "B", "type": "認列", "from": "傳播學導論", "credits": 2, "bucket": "hol_ge", "geDomain": "ge_soc", "status": "pending" },
+      { "table": "B", "type": "認列", "from": "生活與科學的交會", "credits": 2, "bucket": "hol_ge", "geDomain": "ge_nat", "status": "pending" },
+      { "table": "B", "type": "認列", "from": "體育 4 門", "credits": 0, "bucket": "hol_core", "satisfies": ["PE1-1", "PE1-2"], "status": "pending", "note": "2026-09-03 確認適用 114 新制：大一體育 0 學分可認列，大二體育每學期 1 學分須自行修習（115-1 已修 TRX 懸吊訓練）" },
+
+      { "table": "C", "type": "認列", "from": "發展心理學", "credits": 3, "bucket": "dept_core", "satisfies": ["00043"], "status": "pending" },
+      { "table": "C", "type": "認列", "from": "普通數學", "credits": 3, "bucket": "elec_free", "status": "pending" },
+      { "table": "C", "type": "認列", "from": "微積分", "credits": 3, "bucket": "elec_free", "status": "pending" },
+      { "table": "C", "type": "認列", "from": "生物學", "credits": 2, "bucket": "elec_free", "status": "pending" },
+      { "table": "C", "type": "認列", "from": "法文（一）", "credits": 6, "bucket": "elec_free", "status": "pending" },
+      { "table": "C", "type": "認列", "from": "西洋文學概論", "credits": 3, "bucket": "elec_free", "status": "pending" },
+      { "table": "C", "type": "認列", "from": "英文閱讀與會話", "credits": 4, "bucket": "elec_free", "status": "pending" },
+      { "table": "C", "type": "認列", "from": "英美文學作品導讀", "credits": 2, "bucket": "elec_free", "status": "pending" },
+      { "table": "C", "type": "認列", "from": "英語語音學", "credits": 4, "bucket": "elec_free", "status": "pending" },
+      { "table": "C", "type": "認列", "from": "英文文法與習作", "credits": 4, "bucket": "elec_free", "status": "pending" },
+      { "table": "C", "type": "認列", "from": "管樂合奏（一）", "credits": 1, "bucket": "elec_free", "status": "pending" },
+      { "table": "C", "type": "認列", "from": "生理學", "credits": 2, "bucket": "elec_free", "status": "pending", "note": "與本校生理心理學分屬不同學科，不主張抵免，僅申請外系自由選修認列" }
+    ]
+  },
+
+  "terms": [
+    {
+      "id": "1151", "label": "大二上", "year": 2, "term": "fall", "state": "current",
+      "source": "2026-09-03 選課系統課表截圖：綠色＝已選上，紫色＝優先群組（志願排序中）",
+      "courses": [
+        { "code": "01025", "status": "confirmed", "teacher": "蔡群瑞", "room": "ES801", "slot": "二 D2-D4" },
+        { "code": "00007-1", "status": "confirmed", "teacher": "吳明峰", "room": "ES801", "slot": "一 D5-D6" },
+        { "code": "FL-3", "status": "confirmed", "teacher": "趙崇任", "room": "LB101", "slot": "二 D5-D6", "note": "課名：外國語文(基礎德文)" },
+        { "code": "PE2-1", "status": "confirmed", "slot": "一 D7-D8", "note": "課名：TRX 懸吊訓練。114 新制大二體育每學期 1 學分，計入畢業學分" },
+        { "code": "X-電腦應用", "status": "confirmed", "teacher": "劉富容", "room": "SF337", "slot": "二 D7-D8" },
+        { "code": "02795", "status": "confirmed", "slot": "三 D5", "note": "導師時間，0 學分" },
+
+        { "code": "02222-1", "status": "priority", "teacher": "杜秉叡", "room": "ES401", "slot": "三 D2-D4" },
+        { "code": "33312", "status": "priority", "teacher": "邱倚璿", "room": "ES801", "slot": "四 D2-D4" },
+        { "code": "36787", "status": "priority", "teacher": "王思峯", "room": "ES801", "slot": "四 D5-D7" },
+        { "code": "35959", "status": "priority", "teacher": "洪屹傑", "room": "ES302", "slot": "五 D5-D7" },
+        { "code": "X-人體的奧秘", "status": "priority", "slot": "一 D3-D4" },
+
+        { "code": "07943", "status": "pending_add", "teacher": "黃揚名", "room": "SF237", "slot": "一 D2-D4", "note": "因系統擋修（統計學 6 學分）先行刪除。抵免通過即加選；未通過則依系主任已核可之放行，與統計學同學期併修" },
+        { "code": "01190", "status": "pending_add", "teacher": "高玉靜", "room": "SF237", "slot": "五 D2-D4", "note": "因系統擋修（統計學 6 學分）先行刪除。抵免通過即加選；未通過則依系主任已核可之放行，與統計學同學期併修" }
+      ]
+    },
+    { "id": "1152", "label": "大二下", "year": 2, "term": "spring", "state": "planned", "courses": [
+      { "code": "04486", "status": "confirmed", "note": "規劃 115-2 接續修，無須抵免" }
+    ] },
+    { "id": "1161", "label": "大三上", "year": 3, "term": "fall",   "state": "planned", "courses": [] },
+    { "id": "1162", "label": "大三下", "year": 3, "term": "spring", "state": "planned", "courses": [] },
+    { "id": "1171", "label": "大四上", "year": 4, "term": "fall",   "state": "planned", "courses": [] },
+    { "id": "1172", "label": "大四下", "year": 4, "term": "spring", "state": "planned", "courses": [] }
+  ],
+
+  "extraCourses": [
+    { "code": "X-電腦應用", "name": "電腦應用", "credits": 2, "bucket": "hol_ge", "kind": "通", "offered": ["fall"], "code_hint": "DNTI804844", "note": "115-1 課綱：通識 2 學分，開課單位資訊科技，劉富容，週二 D7-D8/SF337，無擋修。通識領域別（NT/PT/ST/DT）課綱未載明，暫依開課單位推定為自然與科技" },
+    { "code": "X-人體的奧秘", "name": "人體的奧秘", "credits": 2, "bucket": "hol_ge", "kind": "通", "offered": ["fall"], "code_hint": "DNTD812243", "note": "醫學類學群通識，推定自然與科技領域。2026-09-03 已確認：排除該課的是醫學院(日)臨床心理系，社會科學院(日)心理系未設定排除科目，故可修" }
+  ]
+}

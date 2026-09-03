@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>畢業學分儀表板｜輔大心理系</title>
+<style>
+:root{
+  --bg:#f6f7f9; --panel:#fff; --ink:#1a1d21; --muted:#6b7280; --line:#e3e6ea;
+  --accent:#2f6feb; --done:#2f6feb; --cur:#12a594; --plan:#f0a020; --transfer:#8b5cf6;
+  --gap:#e3e6ea; --bad:#d8443c; --ok:#12a594; --warn:#c47a08;
+  --radius:10px;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#15171a;--panel:#1d2024;--ink:#e8eaed;--muted:#9aa1ab;--line:#2c3037;
+        --gap:#2c3037;--accent:#5b8dff;--done:#5b8dff;}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC",sans-serif;}
+.wrap{max-width:1180px;margin:0 auto;padding:16px 14px 60px}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px}
+h1{font-size:19px;margin:0;letter-spacing:.02em}
+.sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--muted);padding:7px 12px;font-size:13px;cursor:pointer;font-family:inherit}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+label.chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);
+  background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer}
+nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px;overflow-x:auto}
+nav.tabs button{border:0;background:transparent;color:var(--muted);padding:9px 14px;cursor:pointer;
+  font-size:14px;font-family:inherit;border-bottom:2px solid transparent;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px}
+.card h2{font-size:14px;margin:0 0 12px;letter-spacing:.03em;color:var(--muted);font-weight:600}
+.hero{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end}
+.big{font-size:44px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.big small{font-size:16px;color:var(--muted);font-weight:400}
+.kpis{display:flex;gap:18px;flex-wrap:wrap;margin-left:auto}
+.kpi{min-width:88px}
+.kpi b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.kpi span{font-size:12px;color:var(--muted)}
+.bar{height:12px;border-radius:6px;background:var(--gap);display:flex;overflow:hidden;margin:6px 0 4px}
+.bar i{display:block;height:100%}
+.bar i.t{background:var(--transfer)} .bar i.d{background:var(--done)}
+.bar i.c{background:var(--cur)} .bar i.p{background:var(--plan)}
+.brow{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;align-items:baseline}
+.brow .n{font-weight:600} .brow .v{color:var(--muted);font-variant-numeric:tabular-nums;font-size:12.5px}
+.bucket{margin-bottom:14px}
+.bucket .note{font-size:12px;color:var(--muted);margin-top:2px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:4px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.alerts{display:grid;gap:8px}
+.alert{display:flex;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);font-size:13.5px;align-items:flex-start}
+.alert .tag{flex:none;font-size:11px;padding:2px 7px;border-radius:5px;font-weight:600;margin-top:1px}
+.alert.err{border-color:color-mix(in srgb,var(--bad) 45%,var(--line))}
+.alert.err .tag{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
+.alert.warn .tag{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+.alert.ok{border-color:color-mix(in srgb,var(--ok) 40%,var(--line))}
+.alert.ok .tag{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.alert em{font-style:normal;color:var(--muted);display:block;font-size:12.5px;margin-top:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.slotcol h3{font-size:12.5px;color:var(--muted);margin:0 0 8px;font-weight:600}
+.chip{border:1px solid var(--line);border-left-width:3px;border-radius:8px;padding:8px 10px;margin-bottom:6px;
+  background:var(--panel);font-size:13px;cursor:default}
+.chip .m{color:var(--muted);font-size:11.5px;display:block;margin-top:2px}
+.chip.s-transfer{border-left-color:var(--transfer)}
+.chip.s-done{border-left-color:var(--done)}
+.chip.s-current{border-left-color:var(--cur)}
+.chip.s-planned{border-left-color:var(--plan)}
+.chip.s-todo{border-left-color:var(--gap);opacity:.85}
+.chip.s-blocked{border-left-color:var(--bad)}
+.chip.s-off{border-left-color:var(--warn)}
+.termcol{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px}
+.termcol header{display:block;margin:0 0 10px}
+.termcol h3{margin:0;font-size:14px}
+.termcol .cr{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.termcol .cr.bad{color:var(--bad)}
+.mini{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:15px;padding:0 4px;font-family:inherit}
+.mini:hover{color:var(--bad)}
+select,button.act{font-family:inherit;font-size:13px;padding:7px 10px;border-radius:8px;
+  border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+button.act{cursor:pointer}
+button.act.primary{background:var(--accent);color:#fff;border-color:transparent}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.pill{font-size:11px;padding:2px 7px;border-radius:5px;background:var(--gap);color:var(--muted)}
+.pill.a{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.pill.p{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+.pill.r{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
+.hint{font-size:12.5px;color:var(--muted);margin-top:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+@media(max-width:640px){ .big{font-size:36px} .kpis{margin-left:0;gap:14px} h1{font-size:17px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>畢業學分儀表板</h1>
+    <div class="sub" id="subtitle">載入中…</div>
+  </div>
+  <div class="controls">
+    <div class="seg" id="scenarioSeg"></div>
+    <label class="chk" title="優先志願、待加選、待確認的課程"><input type="checkbox" id="incTentative"> 計入未確定課程</label>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="overview" aria-selected="true">總覽</button>
+  <button data-tab="map" aria-selected="false">課程地圖</button>
+  <button data-tab="plan" aria-selected="false">排課盤</button>
+  <button data-tab="record" aria-selected="false">修課紀錄</button>
+</nav>
+
+<main id="view"></main>
+</div>
+
+<script>
+const S = { req:null, cat:null, rec:null, scenario:'planA', incTentative:false, tab:'overview', edits:null };
+const STATUS_LABEL = { confirmed:'已選上', priority:'優先志願', tentative:'待確認',
+                       pending_add:'待加選', planA:'Plan A', planB:'Plan B' };
+const LS = 'fju-course-plan-v1';
+
+/* ---------- 載入 ---------- */
+Promise.all([
+  fetch('data/requirements.json').then(r=>r.json()),
+  fetch('data/courses.json').then(r=>r.json()),
+  fetch('data/my-record.json').then(r=>r.json())
+]).then(([req,cat,rec])=>{
+  S.req=req; S.cat=cat; S.rec=rec;
+  try{
+    const saved = JSON.parse(localStorage.getItem(LS)||'null');
+    if(saved && saved.terms) S.edits = saved;
+  }catch(e){}
+  if(S.edits) S.rec.terms = S.edits.terms;
+  S.scenario = S.rec.scenarios[0].id;
+  document.getElementById('subtitle').textContent =
+    `${req.meta.school}${req.meta.dept}・${req.meta.cohort} 學年度必修科目表・畢業 ${req.meta.totalCredits} 學分`;
+  buildScenarioSeg();
+  bindTabs();
+  render();
+}).catch(e=>{
+  document.getElementById('view').innerHTML =
+    `<div class="card"><h2>載入失敗</h2><p>${e.message}</p>
+     <p class="hint">若直接以 file:// 開啟，瀏覽器會擋住 fetch。請在此資料夾執行 <code>python3 -m http.server</code> 後開 localhost，或部署到 GitHub Pages。</p></div>`;
+});
+
+/* ---------- 索引與計算 ---------- */
+function allCourses(){
+  return [...S.cat.courses, ...(S.rec.extraCourses||[])];
+}
+function byCode(){
+  const m={}; allCourses().forEach(c=>m[c.code]=c); return m;
+}
+function bucketOf(id){ return S.req.buckets.find(b=>b.id===id); }
+
+// 這門課在目前情境下算不算數
+function isActive(entry){
+  if(entry.status==='confirmed') return true;
+  if(['tentative','priority','pending_add'].includes(entry.status)) return S.incTentative;
+  return entry.status===S.scenario;
+}
+function transferActive(item){
+  if(item.status==='approved') return true;
+  if(item.status==='rejected') return false;
+  const sc = S.rec.scenarios.find(s=>s.id===S.scenario);
+  return sc && sc.pendingAs==='approved';
+}
+
+// 溢流順序：某桶修滿後，多的學分往下一個桶算
+const SPILL = { dept_core:'dept_adv', dept_adv:'elec_major', elec_major:'elec_free', hol_ge:'elec_free', hol_core:'elec_free', hol_basic:'elec_free' };
+
+function compute(){
+  const cmap = byCode();
+  // raw[bucket][kind] = credits
+  const raw = {}; S.req.buckets.forEach(b=>raw[b.id]={transfer:0,done:0,current:0,planned:0});
+  const satisfied = {};      // 課號 -> 來源
+  const placements = [];     // {code,course,termId,term,year,entry}
+
+  S.rec.transfer.items.forEach(it=>{
+    if(!transferActive(it)) return;
+    if(raw[it.bucket]) raw[it.bucket].transfer += it.credits;
+    (it.satisfies||[]).forEach(code=>satisfied[code]={by:'transfer',label:it.type});
+  });
+
+  S.rec.terms.forEach(t=>{
+    (t.courses||[]).forEach(e=>{
+      if(!isActive(e)) return;
+      const c = cmap[e.code]; if(!c) return;
+      const kind = t.state==='done'?'done' : t.state==='current'?'current' : 'planned';
+      if(raw[c.bucket]) raw[c.bucket][kind] += c.credits;
+      satisfied[e.code] = {by:t.id, label:t.label};
+      if(c.base) satisfied[c.base] = satisfied[c.base]||{by:t.id,label:t.label};
+      placements.push({code:e.code, course:c, termId:t.id, term:t, entry:e});
+    });
+  });
+
+  // 套上桶上限與溢流
+  const eff = {}; S.req.buckets.forEach(b=>eff[b.id]={transfer:0,done:0,current:0,planned:0,over:0});
+  const order = ['hol_core','hol_basic','hol_ge','dept_core','dept_adv','elec_major','elec_free'];
+  const carry = {};
+  order.forEach(id=>{
+    const b = bucketOf(id); if(!b) return;
+    const src = raw[id];
+    const inc = carry[id]||{transfer:0,done:0,current:0,planned:0};
+    const tot = {}; ['transfer','done','current','planned'].forEach(k=>tot[k]=src[k]+(inc[k]||0));
+    let room = b.min, spilled={transfer:0,done:0,current:0,planned:0};
+    ['transfer','done','current','planned'].forEach(k=>{
+      const take = Math.min(room, tot[k]);
+      eff[id][k] = take; room -= take; spilled[k] = tot[k]-take;
+    });
+    const next = SPILL[id];
+    const anySpill = Object.values(spilled).reduce((a,b)=>a+b,0);
+    eff[id].over = anySpill;
+    if(next && anySpill>0){
+      carry[next] = carry[next]||{transfer:0,done:0,current:0,planned:0};
+      ['transfer','done','current','planned'].forEach(k=>carry[next][k]+=spilled[k]);
+    }
+  });
+
+  return {raw, eff, satisfied, placements, cmap};
+}
+
+function sumBucket(e){ return e.transfer+e.done+e.current+e.planned; }
+
+/* ---------- 檢查 ---------- */
+function checks(st){
+  const out=[], cmap=st.cmap;
+  const terms = S.rec.terms;
+  const termIndex = {}; terms.forEach((t,i)=>termIndex[t.id]=i);
+
+  // 1. 分類缺口
+  S.req.categories.forEach(cat=>{
+    const got = cat.buckets.reduce((a,id)=>a+sumBucket(st.eff[id]),0);
+    if(got < cat.min){
+      out.push({lv:'warn',tag:'缺口',t:`${cat.name}（${cat.code}）還差 ${cat.min-got} 學分`,
+        d:`目前 ${got} / ${cat.min}`});
+    }
+  });
+
+  // 2. 必修未排（全人核心 + 基本能力）
+  const mustCodes = allCourses().filter(c=>c.kind==='必' && c.credits>0
+    && (c.bucket==='hol_core'||c.bucket==='hol_basic'));
+  const missingHol = mustCodes.filter(c=>!st.satisfied[c.code]);
+  if(missingHol.length){
+    out.push({lv:'err',tag:'必修',t:`${missingHol.length} 門全人必修尚未修習或排入`,
+      d: missingHol.map(c=>c.name).join('、')});
+  }
+
+  // 3. 系核心：45 / 57 池
+  const pool = S.req.rules.find(r=>r.id==='core_pool');
+  const coreGot = sumBucket(st.eff.dept_core);
+  if(coreGot < pool.requiredCredits){
+    const notYet = allCourses().filter(c=>c.bucket==='dept_core' && !st.satisfied[c.code]);
+    out.push({lv:'warn',tag:'系核心',t:`核心課程還差 ${pool.requiredCredits-coreGot} 學分（需 45 / 全部 57）`,
+      d:`尚未排入：${notYet.map(c=>c.name).join('、')||'無'}`});
+  }
+
+  // 4. 社會學／經濟學擇一
+  const soc = st.satisfied['01199'], eco = st.satisfied['02457'];
+  if(soc && eco) out.push({lv:'warn',tag:'擇一',t:'社會學與經濟學同時排入',
+    d:'兩科擇一認列核心課程，另一科只能算選修學分。'});
+
+  // 5. 擋修
+  st.placements.forEach(p=>{
+    const pre = p.course.prereq||[];
+    const waived = (S.rec.waivers||[]).some(w=>w.course===p.code && w.type==='prereq' && w.status==='approved');
+    pre.forEach(req=>{
+      const src = st.satisfied[req.code] || st.satisfied[req.code+'-1'];
+      let ok=false, sameTerm=false;
+      if(src){
+        if(src.by==='transfer') ok=true;
+        else if(termIndex[src.by] < termIndex[p.termId]) ok=true;
+        else sameTerm = true;
+      }
+      if(!ok){
+        if(waived){
+          out.push({lv:'ok',tag:'已放行',t:`${p.course.name}：擋修（${req.note||req.code}）系主任已核可`,
+            d:`排在 ${p.term.label}，不受先修條件限制。`});
+        }else{
+          out.push({lv:'err',tag:'擋修',t:`${p.course.name}（${p.term.label}）先修條件未滿足`,
+            d:`需先修「${req.note||req.code}」。${sameTerm?'目前排在同一學期或更後面。':'尚未排入任何學期。'}`});
+        }
+      }
+    });
+  });
+
+  // 6. 開課學期錯配
+  st.placements.forEach(p=>{
+    const off = p.course.offered||[];
+    if(off.length && !off.includes(p.term.term)){
+      out.push({lv:'warn',tag:'開課',t:`${p.course.name} 排在${p.term.label}，但資料顯示只開${off.includes('fall')?'第一學期':'第二學期'}`,
+        d:p.course.note||'請以選課系統實際開課為準。'});
+    }
+    if(!off.length){
+      out.push({lv:'warn',tag:'開課',t:`${p.course.name} 缺少開課學期資料`,
+        d:'115 學年度排課總表未見此課，排入前請先確認是否開課。'});
+    }
+  });
+
+  // 7. 學期學分上下限
+  S.rec.terms.forEach(t=>{
+    const cr = (t.courses||[]).filter(isActive).reduce((a,e)=>a+((cmap[e.code]||{}).credits||0),0);
+    if(cr===0) return;
+    const min = S.req.termCredits.minByYear[String(t.year)];
+    const isLastYear = t.year===4;
+    if(cr > S.req.termCredits.max)
+      out.push({lv:'err',tag:'超修',t:`${t.label} 共 ${cr} 學分，超過上限 ${S.req.termCredits.max}`,
+        d:`超修至 ${S.req.termCredits.maxExtended} 學分限：${S.req.termCredits.overloadTo32}；超修至 36 學分限：${S.req.termCredits.overloadTo36}。`});
+    else if(min && cr < min && !isLastYear)
+      out.push({lv:'warn',tag:'不足',t:`${t.label} 共 ${cr} 學分，低於最低 ${min} 學分`,
+        d:'《學生選課辦法》第十一條；修業年限最後一年不受此限。'});
+  });
+
+  // 8. 同時段衝突
+  S.rec.terms.forEach(t=>{
+    const act = (t.courses||[]).filter(isActive);
+    act.forEach(e=>{
+      (e.conflictWith||[]).forEach(other=>{
+        if(act.some(x=>x.code===other)){
+          const a=(cmap[e.code]||{}).name, b=(cmap[other]||{}).name;
+          if(a<b) out.push({lv:'err',tag:'衝堂',t:`${t.label}：${a} 與 ${b} 同時段`,
+            d:`${e.slot||''} 只能二選一。`});
+        }
+      });
+    });
+  });
+
+  // 9. 抵認上限
+  const tSum = S.rec.transfer.items.filter(transferActive).reduce((a,i)=>a+i.credits,0);
+  if(tSum > S.req.transfer.cap){
+    out.push({lv:'warn',tag:'抵認上限',t:`申請抵免／認列合計 ${tSum} 學分，超過上限 ${S.req.transfer.cap}`,
+      d:S.req.transfer.note});
+  }
+
+  // 10. 待確認事項
+  (S.req.openQuestions||[]).filter(q=>q.status==='open').forEach(q=>{
+    out.push({lv:'warn',tag:'待確認',t:q.title,d:q.detail});
+  });
+
+  const rank={err:0,warn:1,ok:2};
+  return out.sort((a,b)=>rank[a.lv]-rank[b.lv]);
+}
+
+/* ---------- 畫面 ---------- */
+function buildScenarioSeg(){
+  const el=document.getElementById('scenarioSeg');
+  el.innerHTML = S.rec.scenarios.map(s=>
+    `<button data-sc="${s.id}" title="${s.desc}" aria-pressed="${s.id===S.scenario}">${s.name}</button>`).join('');
+  el.onclick=e=>{const b=e.target.closest('button'); if(!b)return;
+    S.scenario=b.dataset.sc; buildScenarioSeg(); render();};
+}
+function bindTabs(){
+  document.getElementById('tabs').onclick=e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    S.tab=b.dataset.tab;
+    [...document.querySelectorAll('#tabs button')].forEach(x=>x.setAttribute('aria-selected',x===b));
+    render();
+  };
+  document.getElementById('incTentative').onchange=e=>{S.incTentative=e.target.checked; render();};
+}
+function esc(s){return String(s??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));}
+
+function render(){
+  const st = compute();
+  const v = document.getElementById('view');
+  v.innerHTML = ({overview:viewOverview, map:viewMap, plan:viewPlan, record:viewRecord})[S.tab](st);
+  if(S.tab==='plan') wirePlan();
+}
+
+function barHTML(e,min){
+  const p=x=>Math.min(100, min? x/min*100 : 0);
+  return `<div class="bar">
+    <i class="t" style="width:${p(e.transfer)}%"></i>
+    <i class="d" style="width:${p(e.done)}%"></i>
+    <i class="c" style="width:${p(e.current)}%"></i>
+    <i class="p" style="width:${p(e.planned)}%"></i></div>`;
+}
+
+function viewOverview(st){
+  const cats = S.req.categories.map(cat=>{
+    const got = cat.buckets.reduce((a,id)=>a+sumBucket(st.eff[id]),0);
+    return {cat,got};
+  });
+  const total = cats.reduce((a,c)=>a+c.got,0);
+  const need = S.req.meta.totalCredits;
+  const t = ['transfer','done','current','planned'].map(k=>
+    S.req.buckets.reduce((a,b)=>a+st.eff[b.id][k],0));
+  const al = checks(st);
+  const errs = al.filter(a=>a.lv==='err').length;
+
+  return `
+  <div class="card">
+    <div class="hero">
+      <div>
+        <div class="big">${total}<small> / ${need} 學分</small></div>
+        <div class="sub">${S.rec.scenarios.find(s=>s.id===S.scenario).desc}</div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><b style="color:var(--transfer)">${t[0]}</b><span>抵免認列</span></div>
+        <div class="kpi"><b style="color:var(--done)">${t[1]}</b><span>已修畢</span></div>
+        <div class="kpi"><b style="color:var(--cur)">${t[2]}</b><span>本學期</span></div>
+        <div class="kpi"><b style="color:var(--plan)">${t[3]}</b><span>已規劃</span></div>
+        <div class="kpi"><b style="color:${total>=need?'var(--ok)':'var(--muted)'}">${Math.max(0,need-total)}</b><span>尚缺</span></div>
+      </div>
+    </div>
+    ${barHTML({transfer:t[0],done:t[1],current:t[2],planned:t[3]}, need)}
+    <div class="legend">
+      <span><i style="background:var(--transfer)"></i>抵免／認列</span>
+      <span><i style="background:var(--done)"></i>已修畢</span>
+      <span><i style="background:var(--cur)"></i>本學期修習中</span>
+      <span><i style="background:var(--plan)"></i>已排入未來學期</span>
+      <span><i style="background:var(--gap)"></i>缺口</span>
+    </div>
+  </div>
+
+  ${cats.map(({cat,got})=>`
+  <div class="card">
+    <h2>${cat.name}（${cat.code}）　${got} / ${cat.min}</h2>
+    ${cat.buckets.map(id=>{
+      const b=bucketOf(id), e=st.eff[id], s=sumBucket(e);
+      return `<div class="bucket">
+        <div class="brow"><span class="n">${b.name}</span>
+          <span class="v">${s} / ${b.min}${e.over?`　（另有 ${e.over} 學分${SPILL[id]?'溢流至下一類':'超出，不計入畢業學分'}）`:''}</span></div>
+        ${barHTML(e,b.min)}
+        ${b.note?`<div class="note">${b.note}</div>`:''}
+      </div>`;
+    }).join('')}
+  </div>`).join('')}
+
+  <div class="card">
+    <h2>檢查結果　${errs?`<span style="color:var(--bad)">${errs} 項需處理</span>`:'<span style="color:var(--ok)">無阻斷性問題</span>'}</h2>
+    <div class="alerts">
+      ${al.length? al.map(a=>`<div class="alert ${a.lv}">
+        <span class="tag">${a.tag}</span>
+        <div><div>${esc(a.t)}</div>${a.d?`<em>${esc(a.d)}</em>`:''}</div></div>`).join('')
+        : '<div class="alert ok"><span class="tag">OK</span><div>目前沒有偵測到問題。</div></div>'}
+    </div>
+  </div>`;
+}
+
+function statusOf(code, st){
+  const s = st.satisfied[code];
+  if(!s) return 'todo';
+  if(s.by==='transfer') return 'transfer';
+  const t = S.rec.terms.find(x=>x.id===s.by);
+  return t? (t.state==='done'?'done':t.state==='current'?'current':'planned') : 'planned';
+}
+
+function viewMap(st){
+  const label={transfer:'抵免／認列',done:'已修畢',current:'修習中',planned:'已排入',todo:'可修'};
+  const chip=c=>{
+    const s=statusOf(c.code,st);
+    return `<div class="chip s-${s}"><b>${esc(c.name)}</b>
+      <span class="m">${c.credits} 學分・${label[s]}${c.prereq?'・有擋修':''}${
+        (c.offered||[]).length===0?'・未見開課':''}</span></div>`;
+  };
+  const must = allCourses().filter(c=>c.kind==='必' && c.code!=='02795');
+
+  // 上半：已定案的六個學期
+  const placed = `<div class="card"><h2>已抵免／已修／已排入</h2>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(190px,1fr))">
+      ${S.rec.terms.map(t=>{
+        const items = must.filter(c=>{const s=st.satisfied[c.code]; return s && s.by===t.id;});
+        return `<div class="slotcol"><h3>${t.label}</h3>
+          ${items.length? items.map(chip).join('') : '<div class="chip s-todo"><span class="m">尚未排課</span></div>'}
+        </div>`;
+      }).join('')}
+    </div></div>`;
+
+  const transferred = must.filter(c=>statusOf(c.code,st)==='transfer');
+
+  // 下半：待修，依開課學期分組
+  const todo = must.filter(c=>!st.satisfied[c.code]);
+  const groups = [
+    ['只開第一學期（上）', c=>{const o=c.offered||[];return o.includes('fall')&&!o.includes('spring');}],
+    ['只開第二學期（下）', c=>{const o=c.offered||[];return o.includes('spring')&&!o.includes('fall');}],
+    ['上下學期都開',      c=>{const o=c.offered||[];return o.includes('fall')&&o.includes('spring');}],
+    ['開課學期未知',      c=>!(c.offered||[]).length]
+  ];
+
+  return `
+  ${placed}
+  ${transferred.length?`<div class="card"><h2>已由抵免／認列滿足的必修科目（${transferred.reduce((a,c)=>a+c.credits,0)} 學分；另有通識與外系認列學分見「修課紀錄」）</h2>
+    <div class="grid">${transferred.map(chip).join('')}</div></div>`:''}
+  <div class="card"><h2>待修必修課程（${todo.length} 門・${todo.reduce((a,c)=>a+c.credits,0)} 學分）</h2>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(230px,1fr))">
+    ${groups.map(([g,f])=>{
+      const items=todo.filter(f);
+      if(!items.length) return '';
+      return `<div class="slotcol"><h3>${g}（${items.length}）</h3>${items.map(chip).join('')}</div>`;
+    }).join('')}
+    </div>
+    <div class="hint">開課學期依 115 學年度《心理系排課總表》(一)(二) 推定，實際以選課系統為準。核心課程 57 學分中只需修滿 45 學分。</div>
+  </div>`;
+}
+
+function viewPlan(st){
+  const cmap=st.cmap;
+  const opts = allCourses().filter(c=>!st.satisfied[c.code] && c.credits>=0)
+    .sort((a,b)=>a.bucket.localeCompare(b.bucket)||a.name.localeCompare(b.name,'zh-Hant'));
+  return `
+  <div class="card">
+    <h2>排課盤</h2>
+    <div class="hint">把待修課排進未來學期，總覽的學分與檢查會即時重算。編輯只存在這台瀏覽器，按「匯出」取得可覆蓋 <code>data/my-record.json</code> 的內容。</div>
+    <div class="row" style="margin-top:10px">
+      <button class="act primary" id="exportBtn">匯出 my-record.json</button>
+      <button class="act" id="resetBtn">還原成檔案內容</button>
+      <span class="hint" id="editState" style="margin:0"></span>
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">
+  ${S.rec.terms.map(t=>{
+    const act=(t.courses||[]).filter(isActive);
+    const cr=act.reduce((a,e)=>a+((cmap[e.code]||{}).credits||0),0);
+    const min=S.req.termCredits.minByYear[String(t.year)];
+    const bad = cr>S.req.termCredits.max || (cr>0 && min && cr<min && t.year!==4);
+    return `<div class="termcol">
+      <header><h3>${t.label} <span class="pill">${t.id}</span></h3>
+        <div class="cr ${bad?'bad':''}">${cr} 學分${t.state==='current'?'・修習中':''}</div></header>
+      ${(t.courses||[]).map((e,i)=>{
+        const c=cmap[e.code]||{name:e.code,credits:0};
+        const dim = isActive(e)?'':'opacity:.4';
+        const tag = e.status==='confirmed'?'<span class="pill a">已選上</span>'
+          :`<span class="pill p">${STATUS_LABEL[e.status]||e.status}</span>`;
+        return `<div class="chip s-${t.state==='current'?'current':t.state==='done'?'done':'planned'}" style="${dim}">
+          <div style="display:flex;justify-content:space-between;gap:6px;align-items:flex-start">
+            <b>${esc(c.name)}</b>
+            <button class="mini" data-del="${t.id}|${i}" title="移除">×</button></div>
+          <span class="m">${c.credits} 學分 ${tag} ${e.slot?'・'+esc(e.slot):''}</span></div>`;
+      }).join('')}
+      <select data-add="${t.id}" style="width:100%;margin-top:6px">
+        <option value="">＋ 加入課程…</option>
+        ${opts.map(c=>`<option value="${c.code}">${esc(c.name)}（${c.credits}）</option>`).join('')}
+      </select>
+    </div>`;
+  }).join('')}
+  </div>`;
+}
+
+function wirePlan(){
+  document.querySelectorAll('select[data-add]').forEach(sel=>{
+    sel.onchange=()=>{
+      if(!sel.value) return;
+      const t=S.rec.terms.find(x=>x.id===sel.dataset.add);
+      t.courses=t.courses||[];
+      t.courses.push({code:sel.value,status:'confirmed'});
+      persist(); render();
+    };
+  });
+  document.querySelectorAll('[data-del]').forEach(b=>{
+    b.onclick=()=>{
+      const [tid,i]=b.dataset.del.split('|');
+      const t=S.rec.terms.find(x=>x.id===tid);
+      t.courses.splice(+i,1); persist(); render();
+    };
+  });
+  document.getElementById('editState').textContent = S.edits? '目前顯示的是本機編輯版本' : '';
+  document.getElementById('exportBtn').onclick=()=>{
+    const out={...S.rec}; delete out.__v;
+    const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download='my-record.json'; a.click();
+  };
+  document.getElementById('resetBtn').onclick=()=>{
+    localStorage.removeItem(LS); location.reload();
+  };
+}
+
+function persist(){
+  S.edits={terms:S.rec.terms};
+  try{ localStorage.setItem(LS, JSON.stringify(S.edits)); }catch(e){}
+}
+
+function viewRecord(st){
+  const T=S.rec.transfer, cmap=st.cmap;
+  const pill=s=>s==='approved'?'<span class="pill a">已核准</span>'
+    :s==='rejected'?'<span class="pill r">未核准</span>':'<span class="pill p">審核中</span>';
+  const tSum=T.items.filter(transferActive).reduce((a,i)=>a+i.credits,0);
+  return `
+  <div class="card">
+    <h2>學分抵免／認列（${T.status==='pending'?'審核中':'已定案'}）　目前情境計入 ${tSum} 學分・上限 ${S.req.transfer.cap}</h2>
+    <div class="hint" style="margin:0 0 10px">${esc(T.submitted)}。${esc(T.note)}</div>
+    <div style="overflow-x:auto"><table>
+      <tr><th>表</th><th>原校科目</th><th class="num">學分</th><th>類型</th><th>認列到</th><th>狀態</th></tr>
+      ${T.items.map(i=>`<tr>
+        <td>${i.table}</td><td>${esc(i.from)}${i.note?`<div class="hint">${esc(i.note)}</div>`:''}</td>
+        <td class="num">${i.credits}</td><td>${i.type}</td>
+        <td>${bucketOf(i.bucket)?.name||i.bucket}${i.satisfies?`<div class="hint">${i.satisfies.map(c=>(cmap[c]||{}).name||c).join('、')}</div>`:''}</td>
+        <td>${pill(i.status)}</td></tr>`).join('')}
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h2>擋修放行紀錄</h2>
+    <div class="tw"><table><tr><th>課程</th><th>狀態</th><th>說明</th></tr>
+    ${(S.rec.waivers||[]).map(w=>`<tr><td>${(cmap[w.course]||{}).name||w.course}</td>
+      <td>${pill(w.status)}</td><td>${esc(w.note)}</td></tr>`).join('')}
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h2>各學期修課</h2>
+    ${S.rec.terms.map(t=>{
+      const act=(t.courses||[]).filter(isActive);
+      if(!act.length) return '';
+      return `<div style="margin-bottom:14px">
+        <div class="brow"><span class="n">${t.label}（${t.id}）</span>
+          <span class="v">${act.reduce((a,e)=>a+((cmap[e.code]||{}).credits||0),0)} 學分</span></div>
+        <div class="tw"><table>${act.map(e=>{const c=cmap[e.code]||{};
+          return `<tr><td>${esc(c.name||e.code)}</td><td class="num">${c.credits??''}</td>
+          <td>${esc(e.teacher||'')}</td><td>${esc(e.slot||'')}</td>
+          <td>${e.status==='confirmed'?'':`<span class="pill p">${STATUS_LABEL[e.status]||e.status}</span>`}</td></tr>`;}).join('')}</table></div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <div class="card">
+    <h2>資料來源</h2>
+    <ul class="hint" style="margin:0;padding-left:18px">
+      ${S.req.meta.source.concat(S.cat.meta.source).filter((v,i,a)=>a.indexOf(v)===i)
+        .map(s=>`<li>${esc(s)}</li>`).join('')}
+    </ul>
+  </div>`;
+}
+</script>
+</body>
+</html>
