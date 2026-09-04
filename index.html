@@ -89,11 +89,39 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 th{color:var(--muted);font-weight:600;font-size:12px}
 td.num{text-align:right;font-variant-numeric:tabular-nums}
-.pill{font-size:11px;padding:2px 7px;border-radius:5px;background:var(--gap);color:var(--muted)}
+.pill{font-size:11px;padding:2px 7px;border-radius:5px;background:var(--gap);color:var(--muted);
+  white-space:nowrap;display:inline-block}
+.tw table.wide{min-width:660px}
 .pill.a{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
 .pill.p{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
 .pill.r{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
 .hint{font-size:12.5px;color:var(--muted);margin-top:8px}
+/* 逐週進度矩陣 */
+table.mtx{table-layout:fixed;min-width:760px;font-size:12.5px;border-collapse:separate;border-spacing:0}
+table.mtx th,table.mtx td{border-bottom:1px solid var(--line);padding:6px 8px;vertical-align:top}
+table.mtx thead th{position:sticky;top:0;z-index:2;background:var(--panel);
+  border-bottom:2px solid var(--line);font-size:12.5px;color:var(--ink);line-height:1.35;width:150px}
+table.mtx .th-sub{font-weight:400;color:var(--muted);font-size:11px;margin-top:2px}
+table.mtx th.wk{position:sticky;left:0;z-index:3;background:var(--panel);width:82px;
+  text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+table.mtx thead th.wk{z-index:4}
+table.mtx th.wk .dt{display:block;font-weight:400;font-size:10.5px;opacity:.75}
+table.mtx td .dt{display:block;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+table.mtx td.has-d{cursor:pointer}
+table.mtx td.has-d::after{content:'';display:block;height:2px;margin-top:3px;width:18px;
+  background:var(--line);border-radius:2px}
+table.mtx td .dd{display:block;margin-top:5px;padding-top:5px;border-top:1px dashed var(--line);
+  color:var(--muted);font-size:11.5px}
+table.mtx tr.now th.wk,table.mtx tr.now td{background:color-mix(in srgb,var(--accent) 9%,transparent)}
+table.mtx tr.now th.wk{box-shadow:inset 3px 0 0 var(--accent)}
+.k-exam{background:color-mix(in srgb,var(--bad) 13%,transparent)}
+.k-holiday{background:color-mix(in srgb,var(--warn) 14%,transparent);color:var(--muted)}
+.k-selfstudy{background:color-mix(in srgb,var(--cur) 11%,transparent)}
+.k-none{background:repeating-linear-gradient(45deg,transparent,transparent 5px,var(--gap) 5px,var(--gap) 6px)}
+.chip.k-exam{border-left-color:var(--bad)}
+.chip.k-holiday{border-left-color:var(--warn)}
+.chip.k-selfstudy{border-left-color:var(--cur)}
+.chip.k-class{border-left-color:var(--accent)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 @media(max-width:640px){ .big{font-size:36px} .kpis{margin-left:0;gap:14px} h1{font-size:17px} }
 </style>
@@ -113,6 +141,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 
 <nav class="tabs" id="tabs">
   <button data-tab="overview" aria-selected="true">總覽</button>
+  <button data-tab="progress" aria-selected="false">上課進度</button>
   <button data-tab="map" aria-selected="false">課程地圖</button>
   <button data-tab="plan" aria-selected="false">排課盤</button>
   <button data-tab="record" aria-selected="false">修課紀錄</button>
@@ -131,9 +160,9 @@ const LS = 'fju-course-plan-v1';
 // no-cache：資料檔常改，一律跟伺服器重新驗證，避免看到舊的學分數
 const load = f => fetch('data/'+f, {cache:'no-cache'}).then(r=>r.json());
 Promise.all([
-  load('requirements.json'), load('courses.json'), load('my-record.json')
-]).then(([req,cat,rec])=>{
-  S.req=req; S.cat=cat; S.rec=rec;
+  load('requirements.json'), load('courses.json'), load('my-record.json'), load('syllabus.json')
+]).then(([req,cat,rec,syl])=>{
+  S.req=req; S.cat=cat; S.rec=rec; S.syl=syl;
   try{
     const saved = JSON.parse(localStorage.getItem(LS)||'null');
     if(saved && saved.terms) S.edits = saved;
@@ -388,8 +417,10 @@ function esc(s){return String(s??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;
 function render(){
   const st = compute();
   const v = document.getElementById('view');
-  v.innerHTML = ({overview:viewOverview, map:viewMap, plan:viewPlan, record:viewRecord})[S.tab](st);
+  v.innerHTML = ({overview:viewOverview, progress:viewProgress, map:viewMap,
+                  plan:viewPlan, record:viewRecord})[S.tab](st);
   if(S.tab==='plan') wirePlan();
+  if(S.tab==='progress') wireProgress();
 }
 
 function barHTML(e,min){
@@ -469,6 +500,155 @@ function statusOf(code, st){
   if(s.by==='transfer') return 'transfer';
   const t = S.rec.terms.find(x=>x.id===s.by);
   return t? (t.state==='done'?'done':t.state==='current'?'current':'planned') : 'planned';
+}
+
+/* ---------- 上課進度 ---------- */
+const DAY = 86400000;
+function ymd(d){ return `${d.getMonth()+1}/${d.getDate()}`; }
+function weekMonday(n){
+  const w1 = new Date(S.syl.meta.week1Monday+'T00:00:00');
+  return new Date(w1.getTime() + (n-1)*7*DAY);
+}
+function courseDate(weekday, n){
+  return new Date(weekMonday(n).getTime() + (weekday-1)*DAY);
+}
+function currentWeek(){
+  const w1 = new Date(S.syl.meta.week1Monday+'T00:00:00');
+  const now = new Date(); now.setHours(0,0,0,0);
+  const diff = Math.floor((now - w1)/DAY);
+  if(diff < 0) return {state:'before', daysTo: -diff};
+  const n = Math.floor(diff/7)+1;
+  if(n > S.syl.meta.weeks) return {state:'after'};
+  return {state:'in', n};
+}
+// 這學期實際會上、且有課綱進度的課
+function progressCourses(){
+  const term = S.rec.terms.find(t=>t.id===S.syl.meta.term);
+  if(!term) return {shown:[], missing:[]};
+  const shown=[], missing=[];
+  (term.courses||[]).forEach(e=>{
+    if(!isActive(e)) return;
+    const syl = S.syl.courses[e.code];
+    if(syl) shown.push({code:e.code, syl, entry:e});
+    else missing.push({code:e.code, entry:e});
+  });
+  shown.sort((a,b)=>(a.syl.weekday-b.syl.weekday) || a.syl.name.localeCompare(b.syl.name,'zh-Hant'));
+  return {shown, missing};
+}
+
+function viewProgress(st){
+  const {shown, missing} = progressCourses();
+  const W = S.syl.meta.weeks, cur = currentWeek();
+  const WD = ['','一','二','三','四','五','六','日'];
+
+  if(!shown.length) return `<div class="card"><h2>上課進度</h2>
+    <p class="hint">目前這學期沒有可顯示進度的課程。勾選上方「計入未確定課程」可把優先志願與待加選的課一起看。</p></div>`;
+
+  // 本週橫幅
+  let banner;
+  if(cur.state==='before'){
+    const m=weekMonday(1);
+    banner = `<div class="big" style="font-size:30px">開學倒數 ${cur.daysTo} 天</div>
+      <div class="sub">第 1 週從 ${m.getFullYear()}/${ymd(m)}（一）開始・全學期 ${W} 週</div>`;
+  }else if(cur.state==='after'){
+    banner = `<div class="big" style="font-size:30px">學期已結束</div>`;
+  }else{
+    const m=weekMonday(cur.n), s=new Date(m.getTime()+6*DAY);
+    const todays = shown.map(c=>{
+      const w=c.syl.weeks.find(x=>x.n===cur.n);
+      return w?{name:c.syl.name, w, wd:c.syl.weekday}:null;
+    }).filter(Boolean);
+    banner = `<div class="big" style="font-size:30px">第 ${cur.n} 週</div>
+      <div class="sub">${ymd(m)} – ${ymd(s)}・剩下 ${W-cur.n} 週</div>
+      <div class="grid" style="margin-top:12px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))">
+        ${todays.map(t=>`<div class="chip k-${t.w.kind||'class'}">
+          <b>${esc(t.name)}</b><span class="m">週${WD[t.wd]}・${esc(t.w.topic)}</span></div>`).join('')}
+      </div>`;
+  }
+
+  // 考試週彙整
+  const examRows=[];
+  for(let n=1;n<=W;n++){
+    const hits = shown.map(c=>{
+      const w=c.syl.weeks.find(x=>x.n===n);
+      return (w && w.kind==='exam') ? {name:c.syl.name, wd:c.syl.weekday, topic:w.topic} : null;
+    }).filter(Boolean);
+    if(hits.length) examRows.push({n, hits});
+  }
+
+  const cell = (c,n)=>{
+    const w = c.syl.weeks.find(x=>x.n===n);
+    if(!w) return `<td class="k-none"></td>`;
+    const d = courseDate(c.syl.weekday, n);
+    return `<td class="k-${w.kind||'class'}${w.detail?' has-d':''}"
+      ${w.detail?`data-d="${esc(w.detail)}"`:''} title="${esc(w.detail||w.topic)}">
+      <span class="dt">${ymd(d)}</span>${esc(w.topic)}</td>`;
+  };
+
+  return `
+  <div class="card">${banner}</div>
+
+  <div class="card">
+    <h2>考試與成果展示一覽（${examRows.length} 個週次）</h2>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(230px,1fr))">
+    ${examRows.map(r=>{
+      const m=weekMonday(r.n);
+      const hot = r.hits.length>1;
+      return `<div class="chip k-exam"${hot?' style="border-left-width:6px"':''}>
+        <b>第 ${r.n} 週${hot?`　⚠ ${r.hits.length} 科`:''}</b>
+        <span class="m">${ymd(m)} 那週<br>${r.hits.map(h=>`週${WD[h.wd]}　${esc(h.name)}（${esc(h.topic)}）`).join('<br>')}</span>
+      </div>`;
+    }).join('')}
+    </div>
+    <div class="hint">各科期中期末週次不一致是正常的——上課星期不同、遇到的國定假日也不同。認知神經科學導論的期末考排在第 14 週，特別早。</div>
+  </div>
+
+  <div class="card">
+    <h2>逐週進度對照　${shown.length} 科</h2>
+    <div class="tw"><table class="mtx">
+      <thead><tr><th class="wk">週次</th>
+        ${shown.map(c=>`<th><div>${esc(c.syl.name)}</div>
+          <div class="th-sub">週${WD[c.syl.weekday]}${c.syl.teacher?'・'+esc(c.syl.teacher):''}</div></th>`).join('')}
+      </tr></thead>
+      <tbody>
+      ${Array.from({length:W},(_,i)=>i+1).map(n=>{
+        const m=weekMonday(n);
+        const isNow = cur.state==='in' && cur.n===n;
+        return `<tr${isNow?' class="now"':''}>
+          <th class="wk">${n}<span class="dt">${ymd(m)}–${ymd(new Date(m.getTime()+4*DAY))}</span></th>
+          ${shown.map(c=>cell(c,n)).join('')}
+        </tr>`;
+      }).join('')}
+      </tbody>
+    </table></div>
+    <div class="legend" style="margin-top:10px">
+      <span><i style="background:var(--gap)"></i>上課</span>
+      <span><i style="background:color-mix(in srgb,var(--bad) 30%,transparent)"></i>考試／成果展示</span>
+      <span><i style="background:color-mix(in srgb,var(--warn) 30%,transparent)"></i>放假停課</span>
+      <span><i style="background:color-mix(in srgb,var(--cur) 25%,transparent)"></i>自主學習週</span>
+    </div>
+    <div class="hint">點有底線的格子看課程說明。日期依統計學課綱標示的週次日期推算：第 1 週為 ${S.syl.meta.week1Monday} 起。</div>
+  </div>
+
+  ${missing.length?`<div class="card"><h2>沒有課綱進度資料的課</h2>
+    <div class="grid">${missing.map(m=>{
+      const c=(S.syl.noSyllabus||[]).find(x=>x.code===m.code);
+      const nm=c?c.name:((byCode()[m.code]||{}).name||m.code);
+      return `<div class="chip s-todo"><b>${esc(nm)}</b><span class="m">${esc(c?c.reason:'課綱資料夾內沒有這份截圖')}</span></div>`;
+    }).join('')}</div>
+    <div class="hint">之後補上課綱截圖，我可以再把進度加進來。</div></div>`:''}`;
+}
+
+function wireProgress(){
+  document.querySelectorAll('td.has-d').forEach(td=>{
+    td.onclick=()=>{
+      const open = td.querySelector('.dd');
+      if(open){ open.remove(); return; }
+      const s=document.createElement('span');
+      s.className='dd'; s.textContent=td.dataset.d;
+      td.appendChild(s);
+    };
+  });
 }
 
 function viewMap(st){
@@ -610,7 +790,7 @@ function viewRecord(st){
     <h2>學分抵免／科目認列（${T.status==='pending'?'審核中':'已定案'}）　申請合計 ${tSum} 學分・抵認上限 ${S.req.transfer.cap}</h2>
     <div class="hint" style="margin:0 0 10px">${esc(T.submitted)}。${esc(T.note)}</div>
     <div class="hint" style="margin:0 0 10px">${esc(T.modeNote||'')}</div>
-    <div style="overflow-x:auto"><table>
+    <div class="tw"><table class="wide">
       <tr><th>表</th><th>原校科目</th><th class="num">學分</th><th>方式</th><th>對應到</th><th>狀態</th></tr>
       ${T.items.map(i=>{
         const ex = (i.mode||'credit')==='exempt';

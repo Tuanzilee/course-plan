@@ -1,0 +1,244 @@
+{
+  "meta": {
+    "term": "1151",
+    "termLabel": "115 學年度第 1 學期",
+    "week1Monday": "2026-09-14",
+    "weeks": 18,
+    "source": "115-1 各科課綱截圖（2026-09-03 擷取自輔大課程大綱系統）",
+    "anchor": "統計學課綱備註欄逐週標示日期（第 1 週 9/16、第 8 週 11/4、第 18 週 1/13，皆為週三），據此推得第 1 週起於 2026-09-14。",
+    "note": "kind：class 正常上課／exam 考試／holiday 放假停課／selfstudy 自主學習週。各科期中期末週次不一致是正常的，因為上課星期不同、遇到的國定假日也不同。"
+  },
+
+  "courses": {
+    "01025": {
+      "name": "人格心理學", "teacher": "蔡群瑞", "weekday": 2, "room": "ES801",
+      "office": "週五 5-6 節",
+      "weeks": [
+        { "n": 1, "topic": "課程介紹", "detail": "性格理論的系統觀點／性格理論：從日常到系統性格的科學研究" },
+        { "n": 2, "topic": "性格理論", "detail": "心理分析的性格理論" },
+        { "n": 3, "topic": "性格理論", "detail": "心理分析性格理論的應用" },
+        { "n": 4, "topic": "性格理論", "detail": "個人中心的性格理論" },
+        { "n": 5, "topic": "性格理論", "detail": "個人中心性格理論的應用" },
+        { "n": 6, "topic": "性格理論", "detail": "性格特質論" },
+        { "n": 7, "topic": "性格理論", "detail": "性格特質論的應用" },
+        { "n": 8, "topic": "期中考", "kind": "exam" },
+        { "n": 9, "topic": "性格理論", "detail": "電影欣賞與評論" },
+        { "n": 10, "topic": "性格理論", "detail": "性格的生理基礎" },
+        { "n": 11, "topic": "性格理論", "detail": "行為取向的性格理論" },
+        { "n": 12, "topic": "性格理論", "detail": "認知取向的性格理論" },
+        { "n": 13, "topic": "性格理論", "detail": "社會認知的性格理論" },
+        { "n": 14, "topic": "性格理論", "detail": "社會認知性格理論的應用" },
+        { "n": 15, "topic": "性格理論", "detail": "脈絡情境的性格理論" },
+        { "n": 16, "topic": "期末考", "kind": "exam" },
+        { "n": 17, "topic": "自我統整", "detail": "自主學習", "kind": "selfstudy" },
+        { "n": 18, "topic": "統整回饋", "detail": "自主學習", "kind": "selfstudy" }
+      ]
+    },
+
+    "FL-3": {
+      "name": "外國語文（基礎德文）", "teacher": "趙崇任", "weekday": 2, "room": "LB101",
+      "office": "Wednesday 13:00–15:00（建議先預約）",
+      "weeks": [
+        { "n": 1, "topic": "課程介紹" },
+        { "n": 2, "topic": "你好，我的名字是……", "detail": "Lektion 1" },
+        { "n": 3, "topic": "你好，我的名字是……", "detail": "Lektion 1" },
+        { "n": 4, "topic": "你好，我的名字是……", "detail": "Lektion 1" },
+        { "n": 5, "topic": "你好，我的名字是……", "detail": "Lektion 1" },
+        { "n": 6, "topic": "我的家庭", "detail": "Lektion 2" },
+        { "n": 7, "topic": "我的家庭", "detail": "Lektion 2" },
+        { "n": 8, "topic": "期中考週", "detail": "Lektion 1-2", "kind": "exam" },
+        { "n": 9, "topic": "德語電影欣賞" },
+        { "n": 10, "topic": "我的家庭", "detail": "Lektion 2" },
+        { "n": 11, "topic": "我的家庭", "detail": "Lektion 2" },
+        { "n": 12, "topic": "飲食", "detail": "Lektion 3" },
+        { "n": 13, "topic": "飲食", "detail": "Lektion 3" },
+        { "n": 14, "topic": "飲食", "detail": "Lektion 3" },
+        { "n": 15, "topic": "飲食", "detail": "Lektion 3" },
+        { "n": 16, "topic": "期末考週", "detail": "Lektion 2-3", "kind": "exam" },
+        { "n": 17, "topic": "自主學習週", "detail": "複習本學期教過的三個主題內容", "kind": "selfstudy" },
+        { "n": 18, "topic": "自主學習週", "detail": "綜合本學期三個主題，以德文寫一篇兩百字自我或他人介紹（成果納入學期總成績）", "kind": "selfstudy" }
+      ]
+    },
+
+    "X-電腦應用": {
+      "name": "電腦應用", "teacher": "劉富容", "weekday": 2, "room": "SF337",
+      "office": "MON–THR 10:00–16:00",
+      "weeks": [
+        { "n": 1, "topic": "單元一：資料分析原理", "detail": "1-1 資料是什麼／1-2 資料分析原理" },
+        { "n": 2, "topic": "單元一：資料分析原理", "detail": "1-3 搜集資料工具軟體／1-4 定義資料的重要性" },
+        { "n": 3, "topic": "單元一：資料分析原理", "detail": "1-5 資料類型介紹／1-6 各種檔案格式" },
+        { "n": 4, "topic": "單元二：資料視覺化概述", "detail": "2-1 為什麼要視覺化／2-2 視覺化的基本要素" },
+        { "n": 5, "topic": "單元二：資料視覺化概述", "detail": "2-3 圖表製作的基本規則／2-4 資料科學的色彩原理／2-5 圖表的誤導與暗示" },
+        { "n": 6, "topic": "單元三：量化資料蒐集與分析", "detail": "3-0 安裝 Power BI／3-1 資料的準備整理" },
+        { "n": 7, "topic": "單元三：量化資料蒐集與分析", "detail": "3-2 視覺化圖表案例探討／3-3 視覺化圖表案例實作" },
+        { "n": 8, "topic": "單元三：量化資料蒐集與分析", "detail": "3-3 視覺化圖表案例實作" },
+        { "n": 9, "topic": "期中考試", "kind": "exam" },
+        { "n": 10, "topic": "單元四：質化資料蒐集與分析", "detail": "4-1 資料的準備整理／4-2 視覺化圖表案例探討" },
+        { "n": 11, "topic": "單元四：質化資料蒐集與分析", "detail": "4-3 視覺化圖表案例實作" },
+        { "n": 12, "topic": "單元四：質化資料蒐集與分析", "detail": "4-3 視覺化圖表案例實作" },
+        { "n": 13, "topic": "單元五：政府開放資料平台資料案例", "detail": "5-1 如何使用政府開放資料平台／5-2 資料的準備整理" },
+        { "n": 14, "topic": "單元五：政府開放資料平台資料案例", "detail": "5-3 視覺化圖表案例探討／5-4 實作" },
+        { "n": 15, "topic": "單元六：零售業訂單資料案例", "detail": "6-1 資料的準備整理／6-2 關聯資料模型、實作" },
+        { "n": 16, "topic": "單元六：零售業訂單資料案例", "detail": "6-3 視覺化圖表案例討論／6-4 資料說明、實作" },
+        { "n": 17, "topic": "單元六：零售業訂單資料案例", "detail": "6-5 實作" },
+        { "n": 18, "topic": "期末考試", "kind": "exam" }
+      ]
+    },
+
+    "02222-1": {
+      "name": "統計學（上）", "teacher": "杜秉叡", "weekday": 3, "room": "ES401",
+      "office": "請先電子郵件預約，每週四下午 4:30 後或其他時間",
+      "datesConfirmed": true,
+      "weeks": [
+        { "n": 1, "topic": "停課", "detail": "課綱標示「Peace Memorial Day, No Class 和平紀念日補假一日」——9 月不會是和平紀念日，應為教師填表誤植，但確定第 1 週不上課", "kind": "holiday" },
+        { "n": 2, "topic": "課程介紹與說明", "detail": "Course Orientation" },
+        { "n": 3, "topic": "基本概念、展示資料、集中趨勢量數", "detail": "Basic Concepts／Displaying Data／Measures of Central Tendency" },
+        { "n": 4, "topic": "變異量數", "detail": "Measures of Variability" },
+        { "n": 5, "topic": "常態分配", "detail": "The Normal Distribution" },
+        { "n": 6, "topic": "機率的基本概念", "detail": "Basic Concepts of Probability" },
+        { "n": 7, "topic": "抽樣分配和假設檢定", "detail": "Sampling Distributions and Hypothesis Testing" },
+        { "n": 8, "topic": "期中考", "detail": "Mid-Term Exam", "kind": "exam" },
+        { "n": 9, "topic": "相關", "detail": "Correlation" },
+        { "n": 10, "topic": "迴歸", "detail": "Regression" },
+        { "n": 11, "topic": "多元迴歸", "detail": "Multiple Regression" },
+        { "n": 12, "topic": "平均數的假設檢定：單一樣本", "detail": "Hypothesis Testing Applied to Means: One Sample" },
+        { "n": 13, "topic": "平均數的假設檢定：兩關聯樣本", "detail": "Two Related Samples" },
+        { "n": 14, "topic": "平均數的假設檢定：兩獨立樣本", "detail": "Two Independent Samples" },
+        { "n": 15, "topic": "統計檢定力", "detail": "Power" },
+        { "n": 16, "topic": "期末考", "detail": "Final Exam（non-cumulative，不累計範圍）", "kind": "exam" },
+        { "n": 17, "topic": "彈性自主學習週", "kind": "selfstudy" },
+        { "n": 18, "topic": "彈性自主學習週", "kind": "selfstudy" }
+      ]
+    },
+
+    "33312": {
+      "name": "認知神經科學導論", "teacher": "邱倚璿", "weekday": 4, "room": "ES801",
+      "office": "Monday 8:30~9:00",
+      "weeks": [
+        { "n": 1, "topic": "Introduction", "detail": "01_Introduction to cognitive neuroscience" },
+        { "n": 2, "topic": "02_Introducing the brain" },
+        { "n": 3, "topic": "03_The electrophysiological brain" },
+        { "n": 4, "topic": "04_The imaged brain / 05_The lesion brain" },
+        { "n": 5, "topic": "07_The seeing brain" },
+        { "n": 6, "topic": "08_The hearing brain" },
+        { "n": 7, "topic": "09_The attending brain" },
+        { "n": 8, "topic": "期中考", "detail": "Midterm", "kind": "exam" },
+        { "n": 9, "topic": "10_The acting brain / 11_The remembering brain" },
+        { "n": 10, "topic": "15_The executive brain" },
+        { "n": 11, "topic": "13_The literate brain" },
+        { "n": 12, "topic": "12_The speaking brain" },
+        { "n": 13, "topic": "16_The social and emotional brain" },
+        { "n": 14, "topic": "期末考", "detail": "Final——注意：這科期末考排在第 14 週，比其他科都早", "kind": "exam" },
+        { "n": 15, "topic": "Christmas Day", "kind": "holiday" },
+        { "n": 16, "topic": "New Year's Day", "kind": "holiday" },
+        { "n": 17, "topic": "Reflection", "kind": "selfstudy" },
+        { "n": 18, "topic": "Reflection", "kind": "selfstudy" }
+      ]
+    },
+
+    "36787": {
+      "name": "AI時代的AI心理學應用", "teacher": "王思峯", "weekday": 4, "room": "ES801",
+      "weeks": [
+        { "n": 1, "topic": "課程介紹", "detail": "ES801 實體" },
+        { "n": 2, "topic": "AI for Every One", "detail": "Week1 What is AI／Week2 Building AI Projects／Week3 AI in Your Company／Week4 AI and Society（deeplearning.ai 非同步）" },
+        { "n": 3, "topic": "Generative AI for Everyone", "detail": "Week1 Introduction to Generative AI／Week2 Generative AI Projects／Week3 Generative AI in work and life（非同步）" },
+        { "n": 4, "topic": "由 Role Play 角度認識 AI", "detail": "更加貼近心理學應用的視角（Teams 同步）" },
+        { "n": 5, "topic": "Gen AI 素養工作坊(1)", "detail": "(1) prompting 原則與練習／(2) 使用習慣～從作業分享開始（Teams）" },
+        { "n": 6, "topic": "Gen AI 素養工作坊(2)", "detail": "(3) 記憶與專案～自我代理／(4) 自造 GPT～人設立基的 AI 訪談員（Teams）" },
+        { "n": 7, "topic": "小組協作專案", "detail": "Tronclass 非同步" },
+        { "n": 8, "topic": "期中成果展示", "detail": "ES801", "kind": "exam" },
+        { "n": 9, "topic": "AI Python for Beginner(1)", "detail": "Basics of AI Python Coding" },
+        { "n": 10, "topic": "AI Python for Beginner(2)", "detail": "Automating Tasks with Python" },
+        { "n": 11, "topic": "AI Python for Beginner(3)", "detail": "Working with Your Own Data & Documents in Python" },
+        { "n": 12, "topic": "AI Python for Beginner(4)", "detail": "Extending Python with Packages and APIs" },
+        { "n": 13, "topic": "AI Python 輔助的資料分析示例(1)", "detail": "Teams 同步" },
+        { "n": 14, "topic": "AI Python 輔助的資料分析示例(2)", "detail": "Teams 同步" },
+        { "n": 15, "topic": "例假日", "kind": "holiday" },
+        { "n": 16, "topic": "例假日", "kind": "holiday" },
+        { "n": 17, "topic": "期末考", "detail": "ES801（暫定）", "kind": "exam" },
+        { "n": 18, "topic": "彈性週自主學習", "kind": "selfstudy" }
+      ]
+    },
+
+    "35959": {
+      "name": "數據分析", "teacher": "洪屹傑", "weekday": 5, "room": "ES302",
+      "office": "週五 D3 D4",
+      "weeks": [
+        { "n": 1, "topic": "統計學與科學方法、基本數學與測量概念、次數分配", "detail": "ch1~3" },
+        { "n": 2, "topic": "集中趨勢與變異量數、常態曲線與標準分數 I", "detail": "ch4~5" },
+        { "n": 3, "topic": "相關", "detail": "ch6" },
+        { "n": 4, "topic": "線性迴歸", "detail": "ch7" },
+        { "n": 5, "topic": "隨機抽樣與機率", "detail": "ch8" },
+        { "n": 6, "topic": "假設檢定與效能分析", "detail": "ch10~11" },
+        { "n": 7, "topic": "抽樣分佈、z 檢定", "detail": "ch12" },
+        { "n": 8, "topic": "期中考", "detail": "Mid-Term Examination", "kind": "exam" },
+        { "n": 9, "topic": "單樣本平均數 t 檢定", "detail": "ch13" },
+        { "n": 10, "topic": "樣本平均數差異 t 檢定", "detail": "ch14" },
+        { "n": 11, "topic": "單因子變異數分析", "detail": "ch15" },
+        { "n": 12, "topic": "雙因子變異數分析", "detail": "ch16" },
+        { "n": 13, "topic": "卡方分析", "detail": "ch17" },
+        { "n": 14, "topic": "機器學習", "detail": "Machine Learning" },
+        { "n": 15, "topic": "深度學習", "detail": "Deep Learning" },
+        { "n": 16, "topic": "期末考", "detail": "Final Examination", "kind": "exam" },
+        { "n": 17, "topic": "自主學習週", "kind": "selfstudy" },
+        { "n": 18, "topic": "自主學習週", "kind": "selfstudy" }
+      ]
+    },
+
+    "07943": {
+      "name": "心理學實驗法", "teacher": "黃揚名", "weekday": 1, "room": "SF237",
+      "office": "週三下午",
+      "weeks": [
+        { "n": 1, "topic": "課程介紹", "detail": "Ch1" },
+        { "n": 2, "topic": "課程介紹", "detail": "Ch1（Teams 上課）" },
+        { "n": 3, "topic": "教師節補假", "kind": "holiday" },
+        { "n": 4, "topic": "中秋節放假", "kind": "holiday" },
+        { "n": 5, "topic": "Ch3" },
+        { "n": 6, "topic": "Ch4" },
+        { "n": 7, "topic": "Ch5" },
+        { "n": 8, "topic": "Ch6 & 7" },
+        { "n": 9, "topic": "期中考", "kind": "exam" },
+        { "n": 10, "topic": "Ch8" },
+        { "n": 11, "topic": "Ch9" },
+        { "n": 12, "topic": "校慶補假", "kind": "holiday" },
+        { "n": 13, "topic": "Ch10" },
+        { "n": 14, "topic": "Ch11 & Ch12" },
+        { "n": 15, "topic": "Ch12、Ch13 & 14" },
+        { "n": 16, "topic": "期末考", "kind": "exam" },
+        { "n": 17, "topic": "彈性自主學習週", "kind": "selfstudy" },
+        { "n": 18, "topic": "彈性自主學習週", "kind": "selfstudy" }
+      ]
+    },
+
+    "01190": {
+      "name": "心理測驗", "teacher": "高玉靜", "weekday": 5, "room": "SF237",
+      "weeks": [
+        { "n": 1, "topic": "Introduction to Psychological Testing" },
+        { "n": 2, "topic": "Tests and Measurements", "detail": "Ch.1" },
+        { "n": 3, "topic": "心理屬性的定義與測量：能力、興趣與人格", "detail": "Ch.2　Defining and Measuring Psychological Attributes" },
+        { "n": 4, "topic": "Testing and Society", "detail": "Ch.3" },
+        { "n": 5, "topic": "測量與統計的基本概念", "detail": "Ch.4" },
+        { "n": 6, "topic": "量尺、轉換與常模", "detail": "Ch.5　Scales, Transformations, and Norms" },
+        { "n": 7, "topic": "信度：測驗分數的一致性", "detail": "Ch.6　Reliability" },
+        { "n": 8, "topic": "信度資訊的使用與解釋", "detail": "Ch.7" },
+        { "n": 9, "topic": "期中考", "detail": "Midterm Exam", "kind": "exam" },
+        { "n": 10, "topic": "測量效度：內容與構念導向的驗證策略", "detail": "Ch.8" },
+        { "n": 11, "topic": "決策效度：效標關聯效度", "detail": "Ch.9" },
+        { "n": 12, "topic": "專業心理測驗演練 I" },
+        { "n": 13, "topic": "專業心理測驗演練 II" },
+        { "n": 14, "topic": "專業心理測驗演練 III" },
+        { "n": 15, "topic": "專業心理測驗演練 IV" },
+        { "n": 16, "topic": "Item Analysis", "detail": "Ch.10" },
+        { "n": 17, "topic": "Item Analysis（SPSS 實作課程）" },
+        { "n": 18, "topic": "期末考", "detail": "Final Exam", "kind": "exam" }
+      ]
+    }
+  },
+
+  "noSyllabus": [
+    { "code": "00007-1", "name": "人生哲學（上）", "reason": "課綱資料夾內沒有這份截圖" },
+    { "code": "PE2-1", "name": "大二體育（TRX 懸吊訓練）", "reason": "課綱資料夾內沒有這份截圖" },
+    { "code": "X-人體的奧秘", "name": "人體的奧秘", "reason": "課綱資料夾內沒有這份截圖" },
+    { "code": "02795", "name": "導師時間", "reason": "非正式排課，無授課進度" }
+  ]
+}
