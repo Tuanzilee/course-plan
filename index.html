@@ -521,13 +521,13 @@ function currentWeek(){
   if(n > S.syl.meta.weeks) return {state:'after'};
   return {state:'in', n};
 }
-// 這學期實際會上、且有課綱進度的課
+// 這學期的課。刻意不套用「計入未確定課程」開關——那個開關是給學分計算用的，
+// 要看每週上什麼進度時，優先志願與待加選的課一樣要看得到。
 function progressCourses(){
   const term = S.rec.terms.find(t=>t.id===S.syl.meta.term);
   if(!term) return {shown:[], missing:[]};
   const shown=[], missing=[];
   (term.courses||[]).forEach(e=>{
-    if(!isActive(e)) return;
     const syl = S.syl.courses[e.code];
     if(syl) shown.push({code:e.code, syl, entry:e});
     else missing.push({code:e.code, entry:e});
@@ -556,13 +556,14 @@ function viewProgress(st){
     const m=weekMonday(cur.n), s=new Date(m.getTime()+6*DAY);
     const todays = shown.map(c=>{
       const w=c.syl.weeks.find(x=>x.n===cur.n);
-      return w?{name:c.syl.name, w, wd:c.syl.weekday}:null;
-    }).filter(Boolean);
+      return w?{name:c.syl.name, w, wd:c.syl.weekday, st:c.entry.status}:null;
+    }).filter(Boolean).sort((a,b)=>a.wd-b.wd);
     banner = `<div class="big" style="font-size:30px">第 ${cur.n} 週</div>
       <div class="sub">${ymd(m)} – ${ymd(s)}・剩下 ${W-cur.n} 週</div>
       <div class="grid" style="margin-top:12px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))">
         ${todays.map(t=>`<div class="chip k-${t.w.kind||'class'}">
-          <b>${esc(t.name)}</b><span class="m">週${WD[t.wd]}・${esc(t.w.topic)}</span></div>`).join('')}
+          <b>${esc(t.name)}</b><span class="m">週${WD[t.wd]}・${esc(t.w.topic)}${
+            t.st!=='confirmed'?`　<span class="pill p">${STATUS_LABEL[t.st]||t.st}</span>`:''}</span></div>`).join('')}
       </div>`;
   }
 
@@ -571,8 +572,8 @@ function viewProgress(st){
   for(let n=1;n<=W;n++){
     const hits = shown.map(c=>{
       const w=c.syl.weeks.find(x=>x.n===n);
-      return (w && w.kind==='exam') ? {name:c.syl.name, wd:c.syl.weekday, topic:w.topic} : null;
-    }).filter(Boolean);
+      return (w && w.kind==='exam') ? {name:c.syl.name, wd:c.syl.weekday, topic:w.topic, st:c.entry.status} : null;
+    }).filter(Boolean).sort((a,b)=>a.wd-b.wd);
     if(hits.length) examRows.push({n, hits});
   }
 
@@ -600,7 +601,8 @@ function viewProgress(st){
       </div>`;
     }).join('')}
     </div>
-    <div class="hint">各科期中期末週次不一致是正常的——上課星期不同、遇到的國定假日也不同。認知神經科學導論的期末考排在第 14 週，特別早。</div>
+    <div class="hint">各科期中期末週次不一致是正常的——上課星期不同、遇到的國定假日也不同。認知神經科學導論的期末考排在第 14 週，特別早。
+      標了「優先志願」「待加選」的課還沒確定選上，最後真正要考的可能比這裡少。</div>
   </div>
 
   <div class="card">
@@ -608,7 +610,8 @@ function viewProgress(st){
     <div class="tw"><table class="mtx">
       <thead><tr><th class="wk">週次</th>
         ${shown.map(c=>`<th><div>${esc(c.syl.name)}</div>
-          <div class="th-sub">週${WD[c.syl.weekday]}${c.syl.teacher?'・'+esc(c.syl.teacher):''}</div></th>`).join('')}
+          <div class="th-sub">週${WD[c.syl.weekday]}${c.syl.teacher?'・'+esc(c.syl.teacher):''}</div>
+          ${c.entry.status!=='confirmed'?`<div class="th-sub"><span class="pill p">${STATUS_LABEL[c.entry.status]||c.entry.status}</span></div>`:''}</th>`).join('')}
       </tr></thead>
       <tbody>
       ${Array.from({length:W},(_,i)=>i+1).map(n=>{
@@ -627,7 +630,8 @@ function viewProgress(st){
       <span><i style="background:color-mix(in srgb,var(--warn) 30%,transparent)"></i>放假停課</span>
       <span><i style="background:color-mix(in srgb,var(--cur) 25%,transparent)"></i>自主學習週</span>
     </div>
-    <div class="hint">點有底線的格子看課程說明。日期依統計學課綱標示的週次日期推算：第 1 週為 ${S.syl.meta.week1Monday} 起。</div>
+    <div class="hint">點有底線的格子看課程說明。日期依統計學課綱標示的週次日期推算：第 1 週為 ${S.syl.meta.week1Monday} 起。
+      這一頁固定顯示這學期所有有課綱的課，不受上方「計入未確定課程」開關影響——那個開關只管學分怎麼算。</div>
   </div>
 
   ${missing.length?`<div class="card"><h2>沒有課綱進度資料的課</h2>
