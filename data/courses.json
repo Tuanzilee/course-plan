@@ -23,7 +23,7 @@
 
     { "code": "00001-1", "base": "00001", "name": "國文（上）", "credits": 2, "bucket": "hol_basic", "kind": "必", "suggested": { "year": 1, "term": "fall" }, "offered": ["fall"] },
     { "code": "00001-2", "base": "00001", "name": "國文（下）", "credits": 2, "bucket": "hol_basic", "kind": "必", "suggested": { "year": 1, "term": "spring" }, "offered": ["spring"] },
-    { "code": "FL-1", "name": "外國語文（一）", "credits": 2, "bucket": "hol_basic", "kind": "必", "suggested": { "year": 1, "term": "fall" }, "offered": ["fall"], "note": "英文至少 4 學分；達檢定標準者得免修英文改修第二外語" },
+    { "code": "FL-1", "name": "外國語文（一）", "credits": 2, "bucket": "hol_basic", "kind": "必", "suggested": { "year": 1, "term": "fall" }, "offered": ["fall"], "note": "英文至少 4 學分；達檢定標準或英文經認列免修者，改選修第二外語補足，總數仍為 8 學分" },
     { "code": "FL-2", "name": "外國語文（二）", "credits": 2, "bucket": "hol_basic", "kind": "必", "suggested": { "year": 1, "term": "spring" }, "offered": ["spring"] },
     { "code": "FL-3", "name": "外國語文（三）", "credits": 2, "bucket": "hol_basic", "kind": "必", "suggested": { "year": 2, "term": "fall" }, "offered": ["fall"], "note": "115-1 修習之課程為「外國語文(基礎德文)」（趙崇任，週二 D5-D6/LB101）。外國語文 8 學分中英文須至少 4 學分，德文屬第二外語" },
     { "code": "FL-4", "name": "外國語文（四）", "credits": 2, "bucket": "hol_basic", "kind": "必", "suggested": { "year": 2, "term": "spring" }, "offered": ["spring"] },

@@ -128,10 +128,10 @@ const STATUS_LABEL = { confirmed:'已選上', priority:'優先志願', tentative
 const LS = 'fju-course-plan-v1';
 
 /* ---------- 載入 ---------- */
+// no-cache：資料檔常改，一律跟伺服器重新驗證，避免看到舊的學分數
+const load = f => fetch('data/'+f, {cache:'no-cache'}).then(r=>r.json());
 Promise.all([
-  fetch('data/requirements.json').then(r=>r.json()),
-  fetch('data/courses.json').then(r=>r.json()),
-  fetch('data/my-record.json').then(r=>r.json())
+  load('requirements.json'), load('courses.json'), load('my-record.json')
 ]).then(([req,cat,rec])=>{
   S.req=req; S.cat=cat; S.rec=rec;
   try{
@@ -182,11 +182,15 @@ function compute(){
   const raw = {}; S.req.buckets.forEach(b=>raw[b.id]={transfer:0,done:0,current:0,planned:0});
   const satisfied = {};      // 課號 -> 來源
   const placements = [];     // {code,course,termId,term,year,entry}
+  const exempt = [];         // 認列免修、不給學分的項目
 
   S.rec.transfer.items.forEach(it=>{
     if(!transferActive(it)) return;
-    if(raw[it.bucket]) raw[it.bucket].transfer += it.credits;
-    (it.satisfies||[]).forEach(code=>satisfied[code]={by:'transfer',label:it.type});
+    const mode = it.mode || 'credit';
+    // 學分抵免：免修且學分計入。科目認列：只免修，學分空缺須另補。
+    if(mode === 'credit'){ if(raw[it.bucket]) raw[it.bucket].transfer += it.credits; }
+    else if(it.credits > 0) exempt.push(it);
+    (it.satisfies||[]).forEach(code=>satisfied[code]={by:'transfer',label:it.type,mode});
   });
 
   S.rec.terms.forEach(t=>{
@@ -224,7 +228,7 @@ function compute(){
     }
   });
 
-  return {raw, eff, satisfied, placements, cmap};
+  return {raw, eff, satisfied, placements, cmap, exempt};
 }
 
 function sumBucket(e){ return e.transfer+e.done+e.current+e.planned; }
@@ -332,6 +336,20 @@ function checks(st){
     });
   });
 
+  // 8.5 認列免修產生的學分空缺
+  if(st.exempt.length){
+    const gap = st.exempt.reduce((a,i)=>a+i.credits,0);
+    out.push({lv:'err',tag:'須補足',t:`科目認列免修 ${gap} 學分，不計入畢業學分，必須另修其他課程補足`,
+      d: st.exempt.map(i=>`${i.from} ${i.credits}`).join('、')+
+         '。認列＝免上課但不給學分；學分抵免才會直接算進畢業學分。'});
+  }
+  const unsure = S.rec.transfer.items.filter(i=>transferActive(i) && i.modeConfirmed===false);
+  if(unsure.length){
+    out.push({lv:'warn',tag:'待確認',t:`${unsure.length} 項尚未確認屬「學分抵免」或「科目認列」`,
+      d:`兩者差別是給不給學分，影響 ${unsure.reduce((a,i)=>a+i.credits,0)} 學分。`+
+        `目前推定：${unsure.map(i=>`${i.from}→${i.mode==='credit'?'抵免':'認列'}`).join('、')}。請以教務處核定結果為準。`});
+  }
+
   // 9. 抵認上限
   const tSum = S.rec.transfer.items.filter(transferActive).reduce((a,i)=>a+i.credits,0);
   if(tSum > S.req.transfer.cap){
@@ -403,7 +421,7 @@ function viewOverview(st){
         <div class="sub">${S.rec.scenarios.find(s=>s.id===S.scenario).desc}</div>
       </div>
       <div class="kpis">
-        <div class="kpi"><b style="color:var(--transfer)">${t[0]}</b><span>抵免認列</span></div>
+        <div class="kpi"><b style="color:var(--transfer)">${t[0]}</b><span>學分抵免</span></div>
         <div class="kpi"><b style="color:var(--done)">${t[1]}</b><span>已修畢</span></div>
         <div class="kpi"><b style="color:var(--cur)">${t[2]}</b><span>本學期</span></div>
         <div class="kpi"><b style="color:var(--plan)">${t[3]}</b><span>已規劃</span></div>
@@ -412,7 +430,7 @@ function viewOverview(st){
     </div>
     ${barHTML({transfer:t[0],done:t[1],current:t[2],planned:t[3]}, need)}
     <div class="legend">
-      <span><i style="background:var(--transfer)"></i>抵免／認列</span>
+      <span><i style="background:var(--transfer)"></i>學分抵免（給學分）</span>
       <span><i style="background:var(--done)"></i>已修畢</span>
       <span><i style="background:var(--cur)"></i>本學期修習中</span>
       <span><i style="background:var(--plan)"></i>已排入未來學期</span>
@@ -454,11 +472,15 @@ function statusOf(code, st){
 }
 
 function viewMap(st){
-  const label={transfer:'抵免／認列',done:'已修畢',current:'修習中',planned:'已排入',todo:'可修'};
+  const label={done:'已修畢',current:'修習中',planned:'已排入',todo:'可修'};
   const chip=c=>{
     const s=statusOf(c.code,st);
+    const src=st.satisfied[c.code];
+    const how = s==='transfer'
+      ? (src&&src.mode==='exempt' ? '認列免修・不給學分' : '學分抵免')
+      : label[s];
     return `<div class="chip s-${s}"><b>${esc(c.name)}</b>
-      <span class="m">${c.credits} 學分・${label[s]}${c.prereq?'・有擋修':''}${
+      <span class="m">${c.credits} 學分・${how}${c.prereq?'・有擋修':''}${
         (c.offered||[]).length===0?'・未見開課':''}</span></div>`;
   };
   const must = allCourses().filter(c=>c.kind==='必' && c.code!=='02795');
@@ -487,7 +509,7 @@ function viewMap(st){
 
   return `
   ${placed}
-  ${transferred.length?`<div class="card"><h2>已由抵免／認列滿足的必修科目（${transferred.reduce((a,c)=>a+c.credits,0)} 學分；另有通識與外系認列學分見「修課紀錄」）</h2>
+  ${transferred.length?`<div class="card"><h2>已由抵免／認列免修的科目（不必再修；認列的部分不給學分，詳見「修課紀錄」）</h2>
     <div class="grid">${transferred.map(chip).join('')}</div></div>`:''}
   <div class="card"><h2>待修必修課程（${todo.length} 門・${todo.reduce((a,c)=>a+c.credits,0)} 學分）</h2>
     <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(230px,1fr))">
@@ -585,15 +607,20 @@ function viewRecord(st){
   const tSum=T.items.filter(transferActive).reduce((a,i)=>a+i.credits,0);
   return `
   <div class="card">
-    <h2>學分抵免／認列（${T.status==='pending'?'審核中':'已定案'}）　目前情境計入 ${tSum} 學分・上限 ${S.req.transfer.cap}</h2>
+    <h2>學分抵免／科目認列（${T.status==='pending'?'審核中':'已定案'}）　申請合計 ${tSum} 學分・抵認上限 ${S.req.transfer.cap}</h2>
     <div class="hint" style="margin:0 0 10px">${esc(T.submitted)}。${esc(T.note)}</div>
+    <div class="hint" style="margin:0 0 10px">${esc(T.modeNote||'')}</div>
     <div style="overflow-x:auto"><table>
-      <tr><th>表</th><th>原校科目</th><th class="num">學分</th><th>類型</th><th>認列到</th><th>狀態</th></tr>
-      ${T.items.map(i=>`<tr>
+      <tr><th>表</th><th>原校科目</th><th class="num">學分</th><th>方式</th><th>對應到</th><th>狀態</th></tr>
+      ${T.items.map(i=>{
+        const ex = (i.mode||'credit')==='exempt';
+        return `<tr>
         <td>${i.table}</td><td>${esc(i.from)}${i.note?`<div class="hint">${esc(i.note)}</div>`:''}</td>
-        <td class="num">${i.credits}</td><td>${i.type}</td>
+        <td class="num">${i.credits}</td>
+        <td>${ex?'<span class="pill r">認列免修</span>':'<span class="pill a">學分抵免</span>'}
+          <div class="hint">${ex?'不給學分，須另補':'學分計入畢業'}${i.modeConfirmed===false?'<br>方式待確認':''}</div></td>
         <td>${bucketOf(i.bucket)?.name||i.bucket}${i.satisfies?`<div class="hint">${i.satisfies.map(c=>(cmap[c]||{}).name||c).join('、')}</div>`:''}</td>
-        <td>${pill(i.status)}</td></tr>`).join('')}
+        <td>${pill(i.status)}</td></tr>`;}).join('')}
     </table></div>
   </div>
 

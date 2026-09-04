@@ -41,6 +41,13 @@
 
 **抵免結果出爐** → 改 `my-record.json` 的 `transfer.items[].status`（`pending` → `approved` / `rejected`），
 並把 `transfer.status` 改成 `settled`。之後 Plan A / Plan B 切換就只是歷史紀錄，不再影響數字。
+**同時要逐項確認 `mode`**：核定為「學分抵免」的填 `credit`（給學分），核定為「科目認列／免修」
+的填 `exempt`（不給學分，空缺另補），並把 `modeConfirmed` 改成 `true`。
+這一步比 `status` 更影響學分數，不要跳過——詳見 README 的對照表。
+
+`exempt` 項目要不要標 `satisfies`，看免修的是「那一門課」還是「那個學分要求」：
+國文免修就是不用再修國文（標 `satisfies`）；英文免修卻必須改修第二外語補足，
+外國語文 8 學分一分不少，所以**不標** `satisfies`。
 
 **選課定案** → 把 `terms[].courses[]` 裡的 `status` 從 `planA` / `planB` / `tentative` 改成 `confirmed`，
 沒選上的整筆刪掉。
