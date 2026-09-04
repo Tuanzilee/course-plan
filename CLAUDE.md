@@ -94,3 +94,10 @@
 - `checks()` 回傳警示陣列，新增檢查就加在這裡，`lv` 用 `err` / `warn` / `ok`
 
 改介面不要引入框架或 CDN，維持「一個檔案雙擊就能看懂」。
+
+**拖曳一律用 pointer events，不要用 HTML5 drag and drop。** HTML5 DnD 在觸控裝置上
+完全無效，手機會變成拖不動。逐週進度的欄位排序就是這樣踩過一次坑。做法：
+`pointerdown` 記起點 →「橫向位移 > 8px 且大於垂直位移」才判定為拖曳（讓垂直捲動優先）
+→ `elementFromPoint` 找落點 → `pointerup` 套用。CSS 加 `touch-action: pan-y`，
+不要用 `setPointerCapture`（事件掛在 window 上本來就收得到，捕獲反而讓落點判斷變複雜）。
+表格比畫面寬時，記得做拖到邊緣自動橫向捲動，否則搆不到看不見的欄位。

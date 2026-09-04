@@ -102,8 +102,10 @@ table.mtx th,table.mtx td{border-bottom:1px solid var(--line);padding:6px 8px;ve
 table.mtx thead th{position:sticky;top:0;z-index:2;background:var(--panel);
   border-bottom:2px solid var(--line);font-size:12.5px;color:var(--ink);line-height:1.35;width:150px}
 table.mtx .th-sub{font-weight:400;color:var(--muted);font-size:11px;margin-top:2px}
-table.mtx thead th[data-code]{cursor:grab}
-table.mtx thead th.dragging{opacity:.4}
+/* pan-y：手機上垂直捲動照常，橫向手勢才交給欄位拖曳處理 */
+table.mtx thead th[data-code]{cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+table.mtx thead th[data-code]:active{cursor:grabbing}
+table.mtx thead th.dragging{opacity:.45;background:color-mix(in srgb,var(--accent) 12%,var(--panel))}
 table.mtx thead th.drop-l{box-shadow:inset 3px 0 0 var(--accent)}
 table.mtx thead th.drop-r{box-shadow:inset -3px 0 0 var(--accent)}
 .colhd{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:3px}
@@ -647,7 +649,7 @@ function viewProgress(st){
     </div>
     <div class="tw"><table class="mtx">
       <thead><tr><th class="wk">週次</th>
-        ${shown.map((c,i)=>`<th draggable="true" data-code="${esc(c.code)}">
+        ${shown.map((c,i)=>`<th data-code="${esc(c.code)}">
           <div class="colhd">
             <button class="mv" data-mv="-1" title="往左移"${i===0?' disabled':''}>‹</button>
             <span class="grip" title="按住拖曳可調整順序">⠿</span>
@@ -714,38 +716,76 @@ function wireProgress(){
     apply(a);
   };
 
+  // 用 pointer events 而非 HTML5 drag：HTML5 拖放在觸控裝置完全無效，
+  // pointer events 則滑鼠、觸控板、手機一套搞定。
+  const clearMarks = () => document.querySelectorAll('.dragging,.drop-l,.drop-r')
+    .forEach(x=>x.classList.remove('dragging','drop-l','drop-r'));
+
   document.querySelectorAll('table.mtx thead th[data-code]').forEach(th=>{
     const code = th.dataset.code;
 
     th.querySelectorAll('button.mv').forEach(b=>{
       b.onclick = e => { e.stopPropagation(); move(code, +b.dataset.mv); };
-      b.ondragstart = e => e.preventDefault();
+      b.addEventListener('pointerdown', e=>e.stopPropagation());
     });
 
-    th.addEventListener('dragstart', e=>{
-      e.dataTransfer.setData('text/plain', code);
-      e.dataTransfer.effectAllowed='move';
-      th.classList.add('dragging');
-    });
-    th.addEventListener('dragend', ()=>{
-      document.querySelectorAll('.dragging,.drop-l,.drop-r')
-        .forEach(x=>x.classList.remove('dragging','drop-l','drop-r'));
-    });
-    th.addEventListener('dragover', e=>{
-      e.preventDefault(); e.dataTransfer.dropEffect='move';
-      const from = S._cols.indexOf(document.querySelector('.dragging')?.dataset.code);
-      const to = S._cols.indexOf(code);
-      th.classList.toggle('drop-l', from>to);
-      th.classList.toggle('drop-r', from<to);
-    });
-    th.addEventListener('dragleave', ()=>th.classList.remove('drop-l','drop-r'));
-    th.addEventListener('drop', e=>{
-      e.preventDefault();
-      const src = e.dataTransfer.getData('text/plain');
-      if(!src || src===code) return;
-      const a = S._cols.slice();
-      a.splice(a.indexOf(code), 0, a.splice(a.indexOf(src),1)[0]);
-      apply(a);
+    th.addEventListener('pointerdown', e=>{
+      if(e.button!==undefined && e.button!==0) return;
+      const x0=e.clientX, y0=e.clientY;
+      let live=false, target=null, edge=0, raf=0;
+
+      // 表格比畫面寬，拖到左右邊緣時自動橫向捲動，才搆得到看不見的欄位
+      const autoScroll = ()=>{
+        if(!live){ raf=0; return; }
+        if(edge && tw) tw.scrollLeft += edge*14;
+        raf = requestAnimationFrame(autoScroll);
+      };
+
+      const onMove = ev=>{
+        const dx=ev.clientX-x0, dy=ev.clientY-y0;
+        // 先讓垂直捲動優先；橫向移動超過 8px 才判定為拖曳欄位
+        if(!live){
+          if(Math.abs(dx)<8 || Math.abs(dx)<=Math.abs(dy)) return;
+          live=true;
+          // 不用 setPointerCapture：事件掛在 window 上本來就收得到，
+          // 而且捕獲後 elementFromPoint 的落點判斷會變麻煩
+          th.classList.add('dragging');
+          document.body.style.userSelect='none';
+          if(!raf) raf=requestAnimationFrame(autoScroll);
+        }
+        ev.preventDefault();
+        if(tw){
+          const box=tw.getBoundingClientRect(), EDGE=56;
+          edge = ev.clientX > box.right-EDGE ? 1
+               : ev.clientX < box.left+EDGE  ? -1 : 0;
+        }
+        const el=document.elementFromPoint(ev.clientX, ev.clientY);
+        const over=el && el.closest && el.closest('th[data-code]');
+        document.querySelectorAll('.drop-l,.drop-r')
+          .forEach(x=>x.classList.remove('drop-l','drop-r'));
+        target = (over && over!==th) ? over : null;
+        if(target){
+          const from=S._cols.indexOf(code), to=S._cols.indexOf(target.dataset.code);
+          target.classList.add(from>to?'drop-l':'drop-r');
+        }
+      };
+      const onUp = ()=>{
+        const dragged = live;
+        live=false; edge=0;
+        if(raf){ cancelAnimationFrame(raf); raf=0; }
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
+        document.body.style.userSelect='';
+        if(dragged && target){
+          const a=S._cols.slice();
+          a.splice(a.indexOf(target.dataset.code), 0, a.splice(a.indexOf(code),1)[0]);
+          clearMarks(); apply(a);
+        } else clearMarks();
+      };
+      window.addEventListener('pointermove', onMove, {passive:false});
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
     });
   });
 
