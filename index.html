@@ -102,6 +102,16 @@ table.mtx th,table.mtx td{border-bottom:1px solid var(--line);padding:6px 8px;ve
 table.mtx thead th{position:sticky;top:0;z-index:2;background:var(--panel);
   border-bottom:2px solid var(--line);font-size:12.5px;color:var(--ink);line-height:1.35;width:150px}
 table.mtx .th-sub{font-weight:400;color:var(--muted);font-size:11px;margin-top:2px}
+table.mtx thead th[data-code]{cursor:grab}
+table.mtx thead th.dragging{opacity:.4}
+table.mtx thead th.drop-l{box-shadow:inset 3px 0 0 var(--accent)}
+table.mtx thead th.drop-r{box-shadow:inset -3px 0 0 var(--accent)}
+.colhd{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:3px}
+.colhd .grip{color:var(--muted);font-size:13px;line-height:1;cursor:grab;user-select:none}
+.colhd .mv{border:1px solid var(--line);background:var(--panel);color:var(--muted);
+  font-family:inherit;font-size:13px;line-height:1;padding:1px 6px;border-radius:5px;cursor:pointer}
+.colhd .mv:hover:not(:disabled){color:var(--ink);border-color:var(--accent)}
+.colhd .mv:disabled{opacity:.3;cursor:default}
 table.mtx th.wk{position:sticky;left:0;z-index:3;background:var(--panel);width:82px;
   text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
 table.mtx thead th.wk{z-index:4}
@@ -123,7 +133,11 @@ table.mtx tr.now th.wk{box-shadow:inset 3px 0 0 var(--accent)}
 .chip.k-selfstudy{border-left-color:var(--cur)}
 .chip.k-class{border-left-color:var(--accent)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-@media(max-width:640px){ .big{font-size:36px} .kpis{margin-left:0;gap:14px} h1{font-size:17px} }
+@media(max-width:640px){ .big{font-size:36px} .kpis{margin-left:0;gap:14px} h1{font-size:17px}
+  /* 手機上把移動欄位的箭頭放大成好按的觸控目標 */
+  .colhd .mv{padding:5px 10px;font-size:15px}
+  .colhd{margin-bottom:5px}
+}
 </style>
 </head>
 <body>
@@ -523,6 +537,18 @@ function currentWeek(){
 }
 // 這學期的課。刻意不套用「計入未確定課程」開關——那個開關是給學分計算用的，
 // 要看每週上什麼進度時，優先志願與待加選的課一樣要看得到。
+function colOrderKey(){ return 'fju-course-plan-colorder-'+S.syl.meta.term; }
+function loadColOrder(){
+  if(S.colOrder) return S.colOrder;
+  try{ return S.colOrder = JSON.parse(localStorage.getItem(colOrderKey())||'null'); }
+  catch(e){ return null; }
+}
+function saveColOrder(a){
+  S.colOrder = a;
+  try{ a ? localStorage.setItem(colOrderKey(), JSON.stringify(a))
+         : localStorage.removeItem(colOrderKey()); }catch(e){}
+}
+
 function progressCourses(){
   const term = S.rec.terms.find(t=>t.id===S.syl.meta.term);
   if(!term) return {shown:[], missing:[]};
@@ -532,7 +558,13 @@ function progressCourses(){
     if(syl) shown.push({code:e.code, syl, entry:e});
     else missing.push({code:e.code, entry:e});
   });
+  // 預設依上課星期排；有自訂順序時照自訂的來，沒排到的課維持預設相對位置
   shown.sort((a,b)=>(a.syl.weekday-b.syl.weekday) || a.syl.name.localeCompare(b.syl.name,'zh-Hant'));
+  const ord = loadColOrder();
+  if(ord){
+    const at = c => { const i = ord.indexOf(c); return i<0 ? Infinity : i; };
+    shown.sort((a,b)=>at(a.code)-at(b.code));
+  }
   return {shown, missing};
 }
 
@@ -586,6 +618,8 @@ function viewProgress(st){
       <span class="dt">${ymd(d)}</span>${esc(w.topic)}</td>`;
   };
 
+  S._cols = shown.map(c=>c.code);
+
   return `
   <div class="card">${banner}</div>
 
@@ -607,9 +641,19 @@ function viewProgress(st){
 
   <div class="card">
     <h2>逐週進度對照　${shown.length} 科</h2>
+    <div class="row" style="margin:-4px 0 10px">
+      <span class="hint" style="margin:0">拖曳欄位標題，或用 ‹ › 調整科目順序${loadColOrder()?'':'（目前依上課星期排）'}</span>
+      ${loadColOrder()?'<button class="act" id="resetCols">還原預設順序</button>':''}
+    </div>
     <div class="tw"><table class="mtx">
       <thead><tr><th class="wk">週次</th>
-        ${shown.map(c=>`<th><div>${esc(c.syl.name)}</div>
+        ${shown.map((c,i)=>`<th draggable="true" data-code="${esc(c.code)}">
+          <div class="colhd">
+            <button class="mv" data-mv="-1" title="往左移"${i===0?' disabled':''}>‹</button>
+            <span class="grip" title="按住拖曳可調整順序">⠿</span>
+            <button class="mv" data-mv="1" title="往右移"${i===shown.length-1?' disabled':''}>›</button>
+          </div>
+          <div>${esc(c.syl.name)}</div>
           <div class="th-sub">週${WD[c.syl.weekday]}${c.syl.teacher?'・'+esc(c.syl.teacher):''}</div>
           ${c.entry.status!=='confirmed'?`<div class="th-sub"><span class="pill p">${STATUS_LABEL[c.entry.status]||c.entry.status}</span></div>`:''}</th>`).join('')}
       </tr></thead>
@@ -653,6 +697,60 @@ function wireProgress(){
       td.appendChild(s);
     };
   });
+
+  const tw = document.querySelector('.tw');
+  // 重排後保留橫向捲動位置，畫面才不會跳掉
+  const apply = order => {
+    const x = tw ? tw.scrollLeft : 0, y = window.scrollY;
+    saveColOrder(order); render();
+    const nt = document.querySelector('.tw');
+    if(nt) nt.scrollLeft = x;
+    window.scrollTo(0, y);
+  };
+  const move = (code, dir) => {
+    const a = S._cols.slice(), i = a.indexOf(code), j = i+dir;
+    if(i<0 || j<0 || j>=a.length) return;
+    a.splice(j, 0, a.splice(i,1)[0]);
+    apply(a);
+  };
+
+  document.querySelectorAll('table.mtx thead th[data-code]').forEach(th=>{
+    const code = th.dataset.code;
+
+    th.querySelectorAll('button.mv').forEach(b=>{
+      b.onclick = e => { e.stopPropagation(); move(code, +b.dataset.mv); };
+      b.ondragstart = e => e.preventDefault();
+    });
+
+    th.addEventListener('dragstart', e=>{
+      e.dataTransfer.setData('text/plain', code);
+      e.dataTransfer.effectAllowed='move';
+      th.classList.add('dragging');
+    });
+    th.addEventListener('dragend', ()=>{
+      document.querySelectorAll('.dragging,.drop-l,.drop-r')
+        .forEach(x=>x.classList.remove('dragging','drop-l','drop-r'));
+    });
+    th.addEventListener('dragover', e=>{
+      e.preventDefault(); e.dataTransfer.dropEffect='move';
+      const from = S._cols.indexOf(document.querySelector('.dragging')?.dataset.code);
+      const to = S._cols.indexOf(code);
+      th.classList.toggle('drop-l', from>to);
+      th.classList.toggle('drop-r', from<to);
+    });
+    th.addEventListener('dragleave', ()=>th.classList.remove('drop-l','drop-r'));
+    th.addEventListener('drop', e=>{
+      e.preventDefault();
+      const src = e.dataTransfer.getData('text/plain');
+      if(!src || src===code) return;
+      const a = S._cols.slice();
+      a.splice(a.indexOf(code), 0, a.splice(a.indexOf(src),1)[0]);
+      apply(a);
+    });
+  });
+
+  const rb = document.getElementById('resetCols');
+  if(rb) rb.onclick = ()=>apply(null);
 }
 
 function viewMap(st){
