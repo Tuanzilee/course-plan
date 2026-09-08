@@ -96,6 +96,15 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 .pill.p{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
 .pill.r{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
 .hint{font-size:12.5px;color:var(--muted);margin-top:8px}
+/* 預習／課堂／複習三顆點 */
+.dots{display:inline-flex;gap:3px;margin-left:6px;vertical-align:1px}
+.dots i{width:6px;height:6px;border-radius:50%;display:block;
+  background:var(--gap);border:1px solid color-mix(in srgb,var(--muted) 35%,transparent)}
+.dots i.on{border-color:transparent}
+.dots i[data-s="預習"].on{background:var(--plan)}
+.dots i[data-s="課堂"].on{background:var(--cur)}
+.dots i[data-s="複習"].on{background:var(--accent)}
+.wk-row .wd.files{margin-top:4px;font-size:11px;opacity:.8;word-break:break-all}
 /* 課程詳情彈窗 */
 .modal-back{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;display:flex;
   align-items:center;justify-content:center;padding:16px;overscroll-behavior:contain}
@@ -232,9 +241,10 @@ const LS = 'fju-course-plan-v1';
 // no-cache：資料檔常改，一律跟伺服器重新驗證，避免看到舊的學分數
 const load = f => fetch('data/'+f, {cache:'no-cache'}).then(r=>r.json());
 Promise.all([
-  load('requirements.json'), load('courses.json'), load('my-record.json'), load('syllabus.json')
-]).then(([req,cat,rec,syl])=>{
-  S.req=req; S.cat=cat; S.rec=rec; S.syl=syl;
+  load('requirements.json'), load('courses.json'), load('my-record.json'), load('syllabus.json'),
+  load('study-log.json').catch(()=>({meta:{},courses:{}}))   // 還沒掃過筆記也要能開
+]).then(([req,cat,rec,syl,log])=>{
+  S.req=req; S.cat=cat; S.rec=rec; S.syl=syl; S.log=log;
   // 本機編輯會整個蓋掉檔案裡的學期資料，所以只接受同一版本的編輯。
   // 資料更新後（my-record.json 的 version 改了）舊編輯一律丟棄，否則會看到過期的課表。
   try{
@@ -588,6 +598,8 @@ function viewOverview(st){
     }).join('')}
   </div>`).join('')}
 
+  ${studyCard()}
+
   <div class="card">
     <h2>檢查結果　${errs?`<span style="color:var(--bad)">${errs} 項需處理</span>`:'<span style="color:var(--ok)">無阻斷性問題</span>'}</h2>
     <div class="alerts">
@@ -599,12 +611,76 @@ function viewOverview(st){
   </div>`;
 }
 
+function studyCard(){
+  if(!S.syl || !S.log) return '';
+  const {per, total} = studyStats();
+  const list = Object.values(per);
+  if(!list.length) return '';
+  const scanned = (S.log.meta && S.log.meta.scanned) || '尚未掃描';
+  const pct = s => total[s].t ? Math.round(total[s].d/total[s].t*100) : 0;
+  const COLOR = {預習:'var(--plan)', 課堂:'var(--cur)', 複習:'var(--accent)'};
+
+  return `<div class="card">
+    <h2>學習累積　本學期共 ${total.預習.t} 堂正課</h2>
+    ${STAGES.map(s=>`<div class="bucket">
+      <div class="brow"><span class="n">${s}</span>
+        <span class="v">${total[s].d} / ${total[s].t} 堂・${pct(s)}%</span></div>
+      <div class="bar"><i style="width:${pct(s)}%;background:${COLOR[s]}"></i></div>
+    </div>`).join('')}
+    <div class="tw" style="margin-top:12px"><table>
+      <tr><th>科目</th><th class="num">預習</th><th class="num">課堂</th><th class="num">複習</th><th>進度</th></tr>
+      ${list.sort((a,b)=>(b.預習+b.課堂+b.複習)-(a.預習+a.課堂+a.複習)).map(r=>`<tr>
+        <td>${esc(r.name)}</td>
+        ${STAGES.map(s=>`<td class="num">${r[s]} / ${r.total}</td>`).join('')}
+        <td style="min-width:110px"><div class="bar" style="height:8px;margin:4px 0">
+          ${STAGES.map(s=>`<i style="width:${r.total?r[s]/r.total/3*100:0}%;background:${COLOR[s]}"></i>`).join('')}
+        </div></td></tr>`).join('')}
+    </table></div>
+    <div class="hint">分母只算正常上課週，放假、考試、自主學習週不列入。
+      筆記本體在電腦的課程資料夾裡，這裡只記錄產物做了沒。資料掃描時間：${esc(scanned)}。</div>
+  </div>`;
+}
+
 function statusOf(code, st){
   const s = st.satisfied[code];
   if(!s) return 'todo';
   if(s.by==='transfer') return 'transfer';
   const t = S.rec.terms.find(x=>x.id===s.by);
   return t? (t.state==='done'?'done':t.state==='current'?'current':'planned') : 'planned';
+}
+
+/* ---------- 學習紀錄（預習／課堂／複習） ---------- */
+const STAGES = ['預習','課堂','複習'];
+function noteOf(code, n){
+  const c = (S.log && S.log.courses && S.log.courses[code]) || null;
+  return (c && c[String(n)]) || null;
+}
+// 只有正常上課的週次要做預複習；放假、自主學習週、考試週不列入分母
+function isTeachingWeek(w){ return !w.kind; }
+
+function studyStats(){
+  const term = S.rec.terms.find(t=>t.id===S.syl.meta.term);
+  const per = {}, total = {預習:{d:0,t:0}, 課堂:{d:0,t:0}, 複習:{d:0,t:0}};
+  ((term&&term.courses)||[]).forEach(e=>{
+    if(!isActive(e)) return;                       // 依目前情境算，退掉的課不算進分母
+    const syl = S.syl.courses[e.code]; if(!syl) return;
+    const weeks = syl.weeks.filter(isTeachingWeek);
+    const row = {name:(e.name||syl.name), code:e.code, total:weeks.length};
+    STAGES.forEach(st=>{
+      const done = weeks.filter(w=>{ const r=noteOf(e.code,w.n); return r && r[st]; }).length;
+      row[st] = done;
+      total[st].d += done; total[st].t += weeks.length;
+    });
+    per[e.code] = row;
+  });
+  return {per, total};
+}
+
+function dotsHTML(code, n, w){
+  if(w && !isTeachingWeek(w)) return '';
+  const r = noteOf(code, n);
+  return `<span class="dots" title="預習／課堂／複習">${
+    STAGES.map(st=>`<i class="${r&&r[st]?'on':''}" data-s="${st}"></i>`).join('')}</span>`;
 }
 
 /* ---------- 課程詳情 ---------- */
@@ -642,7 +718,7 @@ function openCourseDetail(code){
   add('開課學期', (c.offered||[]).map(o=>o==='fall'?'第一學期':'第二學期').join('／'));
   if(c.suggested) add('必修表建議', `${'一二三四'[c.suggested.year-1]}年級${c.suggested.term==='fall'?'上':'下'}學期`);
 
-  const notes = [entry.note, c.note, syl&&syl.note].filter(Boolean);
+  const notes = [...new Set([entry.note, c.note, syl&&syl.note].filter(Boolean))];
 
   let weeksHTML = '';
   if(syl){
@@ -654,10 +730,14 @@ function openCourseDetail(code){
         ${syl.weeks.map(w=>{
           const d = courseDate(syl.weekday, w.n);
           const now = cur.state==='in' && cur.n===w.n;
+          const rec2 = noteOf(code, w.n);
           return `<div class="wk-row ${w.kind?'k-'+w.kind:''} ${now?'now':''}">
-            <div class="wn"><b>第 ${w.n} 週</b>${ymd(d)}（${WD[syl.weekday]}）</div>
+            <div class="wn"><b>第 ${w.n} 週</b>${ymd(d)}（${WD[syl.weekday]}）
+              ${dotsHTML(code, w.n, w)}</div>
             <div><div>${esc(w.topic)}${w.kind?`　<span class="pill">${KIND[w.kind]}</span>`:''}</div>
-              ${w.detail?`<div class="wd">${esc(w.detail)}</div>`:''}</div>
+              ${w.detail?`<div class="wd">${esc(w.detail)}</div>`:''}
+              ${rec2&&rec2.files.length?`<div class="wd files">${
+                rec2.files.map(f=>esc(f.split('/').pop())).join('<br>')}</div>`:''}</div>
           </div>`;
         }).join('')}
       </div>`;
@@ -911,7 +991,7 @@ function viewProgress(st){
     const d = courseDate(c.syl.weekday, n);
     return `<td class="k-${w.kind||'class'}${w.detail?' has-d':''}"
       ${w.detail?`data-d="${esc(w.detail)}"`:''} title="${esc(w.detail||w.topic)}">
-      <span class="dt">${ymd(d)}</span>${esc(w.topic)}</td>`;
+      <span class="dt">${ymd(d)}${dotsHTML(c.code, n, w)}</span>${esc(w.topic)}</td>`;
   };
 
   S._cols = shown.map(c=>c.code);

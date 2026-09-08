@@ -37,6 +37,26 @@
 | `data/courses.json` | 每學年一次 | 新學年排課總表出來，更新 `offered` 與新課 |
 | `data/my-record.json` | 常動 | 選課、抵免結果出爐、學期結束 |
 | `data/syllabus.json` | 每學期一次 | 新學期課綱出來，重建各科逐週進度 |
+| `data/study-log.json` | 常動 | **不要手改**，跑 `scripts/scan-notes.py` 產生 |
+
+## 學習紀錄（預習／課堂／複習）
+
+筆記本體永遠在 `~/Desktop/P. 進行中專案/FJU psy/02_修課/<學期>/<科目>/W<週次>_<主題>/`，
+**這個 repo 是公開的，絕對不要把筆記內容搬進來**。`study-log.json` 只存三個 boolean
+與相對檔名。
+
+階段靠檔名關鍵字判斷（`scripts/scan-notes.py` 的 `STAGES`）：
+
+| 階段 | 檔名要含 |
+| :-- | :-- |
+| 預習 | `預習講義`／`課前講義`／`講義`（相容 course-handout-builder 的舊命名） |
+| 課堂 | `課堂筆記`／`錄音重點`／`疑問清單`／`Plaud` |
+| 複習 | `複習講義`／`複習筆記`／`課後整理` |
+
+比對順序有意義：「複習講義」也含「講義」，所以複習必須排在預習前面。
+`rendered*`、`pdf-check`、`TTS` 這些中間輸出會被跳過，不重複計入。
+
+hai 寫完筆記後跑 `python3 scripts/scan-notes.py` 再 commit；或她說一聲由我來跑。
 
 ## 新學期的授課進度怎麼建
 
