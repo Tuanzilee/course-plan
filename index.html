@@ -96,6 +96,33 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 .pill.p{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
 .pill.r{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
 .hint{font-size:12.5px;color:var(--muted);margin-top:8px}
+/* 課程詳情彈窗 */
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;display:flex;
+  align-items:center;justify-content:center;padding:16px;overscroll-behavior:contain}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  width:100%;max-width:620px;max-height:86vh;overflow:auto;-webkit-overflow-scrolling:touch}
+.modal-hd{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);
+  padding:14px 16px;display:flex;gap:10px;align-items:flex-start;z-index:1}
+.modal-hd h3{margin:0;font-size:17px;line-height:1.3}
+.modal-hd .sub{margin-top:4px}
+.modal-x{margin-left:auto;border:0;background:transparent;color:var(--muted);cursor:pointer;
+  font-size:22px;line-height:1;padding:0 2px;font-family:inherit}
+.modal-bd{padding:14px 16px 18px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13.5px;margin-bottom:14px}
+.kv dt{color:var(--muted);white-space:nowrap}
+.kv dd{margin:0}
+.wk-list{border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.wk-row{display:grid;grid-template-columns:64px 1fr;gap:10px;padding:7px 10px;font-size:13px;
+  border-bottom:1px solid var(--line)}
+.wk-row:last-child{border-bottom:0}
+.wk-row .wn{color:var(--muted);font-variant-numeric:tabular-nums;font-size:12px}
+.wk-row .wn b{display:block;color:var(--ink);font-size:13px}
+.wk-row .wd{color:var(--muted);font-size:12px;margin-top:2px}
+.wk-row.now{box-shadow:inset 3px 0 0 var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent)}
+@media(max-width:640px){
+  .modal-back{align-items:flex-end;padding:0}
+  .modal{max-width:none;max-height:90vh;border-radius:14px 14px 0 0;border-bottom:0}
+}
 /* 可視化課表 */
 .tt{min-width:660px}
 .tt-head{display:flex}
@@ -111,7 +138,9 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 .tt-col{flex:1;position:relative;border-left:1px solid var(--line)}
 .tt-cell{border-bottom:1px solid var(--line);box-sizing:border-box}
 .tt-block{position:absolute;border-radius:7px;padding:5px 7px;overflow:hidden;
-  font-size:11.5px;line-height:1.3;box-sizing:border-box;border-left:3px solid}
+  font-size:11.5px;line-height:1.3;box-sizing:border-box;border-left:3px solid;cursor:pointer}
+.tt-block:hover{filter:brightness(.97)}
+.tt-block:active{transform:scale(.99)}
 .tt-block b{display:block;font-size:12px;font-weight:600}
 .tt-block span{display:block;color:var(--muted);font-size:10.5px}
 .tt-tag{display:inline-block!important;margin-top:3px;padding:1px 5px;border-radius:4px;
@@ -471,6 +500,9 @@ function render(){
                   map:viewMap, plan:viewPlan, record:viewRecord})[S.tab](st);
   if(S.tab==='plan') wirePlan();
   if(S.tab==='progress') wireProgress();
+  document.querySelectorAll('[data-detail]').forEach(el=>{
+    el.onclick = ()=>openCourseDetail(el.dataset.detail);
+  });
   renderNotice();
 }
 
@@ -575,6 +607,90 @@ function statusOf(code, st){
   return t? (t.state==='done'?'done':t.state==='current'?'current':'planned') : 'planned';
 }
 
+/* ---------- 課程詳情 ---------- */
+function closeDetail(){ document.querySelector('.modal-back')?.remove(); }
+
+function openCourseDetail(code){
+  closeDetail();
+  const term = S.rec.terms.find(t=>t.id===S.syl.meta.term);
+  const entry = ((term&&term.courses)||[]).find(e=>e.code===code) || {};
+  const c = byCode()[code] || {};
+  const syl = S.syl.courses[code];
+  const cur = currentWeek();
+  const WD = ['','一','二','三','四','五','六','日'];
+  const KIND = {exam:'考試／成果展示', holiday:'放假停課', selfstudy:'自主學習週'};
+
+  const statusTag = entry.dropIf ? '<span class="pill r">抵免過就退</span>'
+    : entry.status==='confirmed' ? '<span class="pill a">已選上</span>'
+    : entry.status==='planA' ? '<span class="pill p">抵免過才修</span>'
+    : entry.status==='planB' ? '<span class="pill p">抵免沒過才修</span>'
+    : entry.status ? `<span class="pill p">${STATUS_LABEL[entry.status]||entry.status}</span>` : '';
+
+  const rows = [];
+  const add = (k,v) => { if(v) rows.push(`<dt>${k}</dt><dd>${v}</dd>`); };
+  add('課號', entry.officialCode ? `${esc(entry.officialCode)}<span class="hint" style="margin:0">　目錄代碼 ${esc(code)}</span>` : esc(code));
+  add('學分', c.credits!=null ? `${c.credits} 學分` : '');
+  add('類別', [bucketOf(c.bucket)?.name, c.kind==='必'?'必修':c.kind==='選'?'選修':c.kind==='通'?'通識':''].filter(Boolean).join('・'));
+  add('課群', c.group ? esc(c.group) : '');
+  add('教師', esc(entry.teacher || (syl&&syl.teacher) || ''));
+  add('時間', esc(entry.slot||''));
+  add('教室', esc(entry.room || (syl&&syl.room) || ''));
+  add('Office Hour', syl&&syl.office ? esc(syl.office) : '');
+  add('擋修條件', (c.prereq||[]).map(p=>esc(p.note||p.code)).join('、'));
+  const waiver = (S.rec.waivers||[]).find(w=>w.course===code && w.status==='approved');
+  if(waiver) add('擋修放行', `<span class="pill a">已核可</span> ${esc(waiver.note)}`);
+  add('開課學期', (c.offered||[]).map(o=>o==='fall'?'第一學期':'第二學期').join('／'));
+  if(c.suggested) add('必修表建議', `${'一二三四'[c.suggested.year-1]}年級${c.suggested.term==='fall'?'上':'下'}學期`);
+
+  const notes = [entry.note, c.note, syl&&syl.note].filter(Boolean);
+
+  let weeksHTML = '';
+  if(syl){
+    const exams = syl.weeks.filter(w=>w.kind==='exam');
+    weeksHTML = `
+      <h4 style="font-size:13px;color:var(--muted);margin:0 0 8px">逐週進度　${
+        exams.length?`考試週：${exams.map(w=>'第 '+w.n+' 週').join('、')}`:'全學期無考試週'}</h4>
+      <div class="wk-list">
+        ${syl.weeks.map(w=>{
+          const d = courseDate(syl.weekday, w.n);
+          const now = cur.state==='in' && cur.n===w.n;
+          return `<div class="wk-row ${w.kind?'k-'+w.kind:''} ${now?'now':''}">
+            <div class="wn"><b>第 ${w.n} 週</b>${ymd(d)}（${WD[syl.weekday]}）</div>
+            <div><div>${esc(w.topic)}${w.kind?`　<span class="pill">${KIND[w.kind]}</span>`:''}</div>
+              ${w.detail?`<div class="wd">${esc(w.detail)}</div>`:''}</div>
+          </div>`;
+        }).join('')}
+      </div>`;
+  }else{
+    const ns = (S.syl.noSyllabus||[]).find(n=>n.code===code);
+    weeksHTML = `<div class="hint" style="margin:0">沒有逐週進度資料。${ns?esc(ns.reason):'課綱資料夾內沒有這份截圖。'}</div>`;
+  }
+
+  const el = document.createElement('div');
+  el.className = 'modal-back';
+  el.innerHTML = `<div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-hd">
+      <div>
+        <h3>${esc(entry.name || c.name || code)}</h3>
+        <div class="sub">${statusTag}${entry.slot?esc(entry.slot):(syl&&syl.weekday?`週${WD[syl.weekday]}`:'')}${
+          entry.room?'・'+esc(entry.room):''}</div>
+      </div>
+      <button class="modal-x" aria-label="關閉">×</button>
+    </div>
+    <div class="modal-bd">
+      <dl class="kv">${rows.join('')}</dl>
+      ${notes.length?`<div class="hint" style="margin:0 0 14px">${notes.map(esc).join('<br>')}</div>`:''}
+      ${weeksHTML}
+    </div>
+  </div>`;
+  el.addEventListener('click', e=>{ if(e.target===el) closeDetail(); });
+  el.querySelector('.modal-x').onclick = closeDetail;
+  document.body.appendChild(el);
+  document.addEventListener('keydown', function esc2(ev){
+    if(ev.key==='Escape'){ closeDetail(); document.removeEventListener('keydown', esc2); }
+  });
+}
+
 /* ---------- 可視化課表 ---------- */
 // slot 例："二 D2-D4"、"一 D7-D8"、"三 D5"
 function parseSlot(slot){
@@ -664,10 +780,10 @@ function viewTimetable(st){
             ${rows.map(()=>`<div class="tt-cell" style="height:${ROW}px"></div>`).join('')}
             ${laid.filter(b=>b.day===i+1).map(b=>{
               const t = tag(b.entry);
-              return `<div class="tt-block k-${blockKind(b.entry)}"
+              return `<div class="tt-block k-${blockKind(b.entry)}" data-detail="${esc(b.entry.code)}"
                 style="top:${(b.from-lo)*ROW}px;height:${(b.to-b.from+1)*ROW-4}px;
                        left:calc(${b.idx/b.of*100}% + 2px);width:calc(${100/b.of}% - 4px)"
-                title="${esc(b.course.name||'')}${b.entry.teacher?'　'+esc(b.entry.teacher):''}${b.entry.room?'　'+esc(b.entry.room):''}">
+                title="點一下看課程詳情">
                 <b>${esc(b.entry.name||b.course.name||b.entry.code)}</b>
                 <span>${b.entry.teacher?esc(b.entry.teacher):''}${b.entry.room?'・'+esc(b.entry.room):''}</span>
                 ${t?`<span class="tt-tag">${t}</span>`:''}
@@ -683,7 +799,7 @@ function viewTimetable(st){
       <span><i style="background:var(--transfer)"></i>情境替代（抵免過才修）</span>
       <span><i style="background:var(--bad)"></i>抵免過就退</span>
     </div>
-    <div class="hint">同一格並排代表那個時段有兩個選項，只能擇一。
+    <div class="hint">點任一堂課看完整資訊與逐週進度。同一格並排代表那個時段有兩個選項，只能擇一——
       週三 D2-D4 的統計學與社會學、週一與週五 D2-D4 的待加選課程都是這種情況。</div>
   </div>
 
@@ -986,7 +1102,7 @@ function viewMap(st){
     const how = s==='transfer'
       ? (src&&src.mode==='exempt' ? '認列免修・不給學分' : '學分抵免')
       : label[s];
-    return `<div class="chip s-${s}"><b>${esc(c.name)}</b>
+    return `<div class="chip s-${s}" data-detail="${esc(c.code)}"><b>${esc(c.name)}</b>
       <span class="m">${c.credits} 學分・${how}${c.prereq?'・有擋修':''}${
         (c.offered||[]).length===0?'・未見開課':''}</span></div>`;
   };
@@ -1061,7 +1177,8 @@ function viewPlan(st){
             ? '<span class="pill a">已選上</span>'
             : `<span class="pill p">${STATUS_LABEL[e.status]||e.status}</span>`)
           + (e.dropIf ? `<span class="pill r">${e.dropIf==='planA'?'抵免過就退':'退選'}</span>` : '');
-        return `<div class="chip s-${t.state==='current'?'current':t.state==='done'?'done':'planned'}" style="${dim}">
+        return `<div class="chip s-${t.state==='current'?'current':t.state==='done'?'done':'planned'}"
+          data-detail="${esc(e.code)}" style="${dim};cursor:pointer">
           <div style="display:flex;justify-content:space-between;gap:6px;align-items:flex-start">
             <b>${esc(nm)}</b>
             <button class="mini" data-del="${t.id}|${i}" title="移除">×</button></div>
@@ -1087,7 +1204,8 @@ function wirePlan(){
     };
   });
   document.querySelectorAll('[data-del]').forEach(b=>{
-    b.onclick=()=>{
+    b.onclick=(ev)=>{
+      ev.stopPropagation();               // 別讓刪除鈕順便開啟課程詳情
       const [tid,i]=b.dataset.del.split('|');
       const t=S.rec.terms.find(x=>x.id===tid);
       t.courses.splice(+i,1); persist(); render();
