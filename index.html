@@ -96,6 +96,31 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 .pill.p{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
 .pill.r{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
 .hint{font-size:12.5px;color:var(--muted);margin-top:8px}
+/* 可視化課表 */
+.tt{min-width:660px}
+.tt-head{display:flex}
+.tt-head .tt-time{flex:0 0 58px}
+.tt-day{flex:1;text-align:center;font-size:12.5px;font-weight:600;color:var(--muted);
+  padding:6px 0;border-bottom:2px solid var(--line)}
+.tt-body{display:flex;position:relative}
+.tt-body .tt-time{flex:0 0 58px}
+.tt-slot{border-bottom:1px solid var(--line);box-sizing:border-box;padding:3px 6px 0 0;
+  text-align:right;line-height:1.2}
+.tt-slot b{display:block;font-size:11.5px;color:var(--ink);font-weight:600}
+.tt-slot span{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tt-col{flex:1;position:relative;border-left:1px solid var(--line)}
+.tt-cell{border-bottom:1px solid var(--line);box-sizing:border-box}
+.tt-block{position:absolute;border-radius:7px;padding:5px 7px;overflow:hidden;
+  font-size:11.5px;line-height:1.3;box-sizing:border-box;border-left:3px solid}
+.tt-block b{display:block;font-size:12px;font-weight:600}
+.tt-block span{display:block;color:var(--muted);font-size:10.5px}
+.tt-tag{display:inline-block!important;margin-top:3px;padding:1px 5px;border-radius:4px;
+  font-size:9.5px;background:rgba(0,0,0,.07);color:var(--ink)!important}
+@media (prefers-color-scheme:dark){ .tt-tag{background:rgba(255,255,255,.12)} }
+.tt-block.k-on{background:color-mix(in srgb,var(--cur) 15%,var(--panel));border-left-color:var(--cur)}
+.tt-block.k-add{background:color-mix(in srgb,var(--plan) 16%,var(--panel));border-left-color:var(--plan)}
+.tt-block.k-alt{background:color-mix(in srgb,var(--transfer) 15%,var(--panel));border-left-color:var(--transfer)}
+.tt-block.k-drop{background:color-mix(in srgb,var(--bad) 12%,var(--panel));border-left-color:var(--bad)}
 /* 逐週進度矩陣 */
 table.mtx{table-layout:fixed;min-width:760px;font-size:12.5px;border-collapse:separate;border-spacing:0}
 table.mtx th,table.mtx td{border-bottom:1px solid var(--line);padding:6px 8px;vertical-align:top}
@@ -157,6 +182,7 @@ table.mtx tr.now th.wk{box-shadow:inset 3px 0 0 var(--accent)}
 
 <nav class="tabs" id="tabs">
   <button data-tab="overview" aria-selected="true">總覽</button>
+  <button data-tab="timetable" aria-selected="false">課表</button>
   <button data-tab="progress" aria-selected="false">上課進度</button>
   <button data-tab="map" aria-selected="false">課程地圖</button>
   <button data-tab="plan" aria-selected="false">排課盤</button>
@@ -435,8 +461,8 @@ function esc(s){return String(s??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;
 function render(){
   const st = compute();
   const v = document.getElementById('view');
-  v.innerHTML = ({overview:viewOverview, progress:viewProgress, map:viewMap,
-                  plan:viewPlan, record:viewRecord})[S.tab](st);
+  v.innerHTML = ({overview:viewOverview, timetable:viewTimetable, progress:viewProgress,
+                  map:viewMap, plan:viewPlan, record:viewRecord})[S.tab](st);
   if(S.tab==='plan') wirePlan();
   if(S.tab==='progress') wireProgress();
 }
@@ -518,6 +544,124 @@ function statusOf(code, st){
   if(s.by==='transfer') return 'transfer';
   const t = S.rec.terms.find(x=>x.id===s.by);
   return t? (t.state==='done'?'done':t.state==='current'?'current':'planned') : 'planned';
+}
+
+/* ---------- 可視化課表 ---------- */
+// slot 例："二 D2-D4"、"一 D7-D8"、"三 D5"
+function parseSlot(slot){
+  if(!slot) return null;
+  const m = String(slot).trim().match(/^([一二三四五六日])\s*([DE][0-9N])(?:\s*[-–~]\s*([DE][0-9N]))?/);
+  if(!m) return null;
+  const day = '一二三四五六日'.indexOf(m[1]) + 1;
+  const ids = S.req.periods.map(p=>p.id);
+  const a = ids.indexOf(m[2]);
+  const b = m[3] ? ids.indexOf(m[3]) : a;
+  if(a < 0 || b < 0) return null;
+  return {day, from:Math.min(a,b), to:Math.max(a,b)};
+}
+
+function timetableBlocks(){
+  const term = S.rec.terms.find(t=>t.id===S.syl.meta.term);
+  if(!term) return {blocks:[], noSlot:[]};
+  const cmap = byCode();
+  const blocks=[], noSlot=[];
+  (term.courses||[]).forEach(e=>{
+    const c = cmap[e.code] || {};
+    const p = parseSlot(e.slot);
+    if(p) blocks.push({...p, entry:e, course:c});
+    else noSlot.push({entry:e, course:c});
+  });
+  return {blocks, noSlot};
+}
+
+function blockKind(e){
+  if(e.dropIf) return 'drop';
+  if(e.status==='confirmed') return 'on';
+  if(e.status==='pending_add') return 'add';
+  return 'alt';                     // planA / planB / priority / tentative
+}
+
+function viewTimetable(st){
+  const {blocks, noSlot} = timetableBlocks();
+  const ids = S.req.periods.map(p=>p.id);
+  const WD = ['一','二','三','四','五'];
+
+  if(!blocks.length) return `<div class="card"><h2>課表</h2>
+    <p class="hint">這學期的課還沒有上課時間資料。</p></div>`;
+
+  // 只畫用得到的節次範圍，上下各留一節當緩衝
+  const lo = Math.max(0, Math.min(...blocks.map(b=>b.from)) - 1);
+  const hi = Math.min(ids.length-1, Math.max(...blocks.map(b=>b.to)) + 1);
+  const rows = S.req.periods.slice(lo, hi+1);
+  const ROW = 46;
+
+  // 同一天內互相重疊的區塊並排放（例：週三的統計學與社會學）
+  const laid = [];
+  for(let d=1; d<=5; d++){
+    const day = blocks.filter(b=>b.day===d).sort((a,b)=>a.from-b.from || a.to-b.to);
+    const groups=[];
+    day.forEach(b=>{
+      const g = groups.find(g=>g.some(x=>b.from<=x.to && x.from<=b.to));
+      if(g) g.push(b); else groups.push([b]);
+    });
+    groups.forEach(g=>g.forEach((b,i)=>laid.push({...b, idx:i, of:g.length})));
+  }
+
+  const tag = e => e.dropIf ? '抵免過就退'
+    : e.status==='planA' ? '抵免過才修'
+    : e.status==='planB' ? '抵免沒過才修'
+    : e.status==='confirmed' ? ''
+    : (STATUS_LABEL[e.status] || e.status);
+
+  // 目前實際選上的學分（含之後可能退掉的統計學與數據分析）
+  const credits = blocks.filter(b=>b.entry.status==='confirmed')
+    .reduce((a,b)=>a+(b.course.credits||0),0);
+
+  return `
+  <div class="card">
+    <h2>115 學年度第 1 學期課表　已選上 ${credits} 學分</h2>
+    <div class="tw">
+      <div class="tt" style="--row:${ROW}px">
+        <div class="tt-head">
+          <div class="tt-time"></div>
+          ${WD.map(d=>`<div class="tt-day">週${d}</div>`).join('')}
+        </div>
+        <div class="tt-body" style="height:${rows.length*ROW}px">
+          <div class="tt-time">
+            ${rows.map(p=>`<div class="tt-slot" style="height:${ROW}px">
+              <b>${p.id}</b><span>${p.from}</span></div>`).join('')}
+          </div>
+          ${WD.map((_,i)=>`<div class="tt-col">
+            ${rows.map(()=>`<div class="tt-cell" style="height:${ROW}px"></div>`).join('')}
+            ${laid.filter(b=>b.day===i+1).map(b=>{
+              const t = tag(b.entry);
+              return `<div class="tt-block k-${blockKind(b.entry)}"
+                style="top:${(b.from-lo)*ROW}px;height:${(b.to-b.from+1)*ROW-4}px;
+                       left:calc(${b.idx/b.of*100}% + 2px);width:calc(${100/b.of}% - 4px)"
+                title="${esc(b.course.name||'')}${b.entry.teacher?'　'+esc(b.entry.teacher):''}${b.entry.room?'　'+esc(b.entry.room):''}">
+                <b>${esc(b.entry.name||b.course.name||b.entry.code)}</b>
+                <span>${b.entry.teacher?esc(b.entry.teacher):''}${b.entry.room?'・'+esc(b.entry.room):''}</span>
+                ${t?`<span class="tt-tag">${t}</span>`:''}
+              </div>`;
+            }).join('')}
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="legend" style="margin-top:12px">
+      <span><i style="background:var(--cur)"></i>已選上</span>
+      <span><i style="background:var(--plan)"></i>待加選（實驗法、心測）</span>
+      <span><i style="background:var(--transfer)"></i>情境替代（抵免過才修）</span>
+      <span><i style="background:var(--bad)"></i>抵免過就退</span>
+    </div>
+    <div class="hint">同一格並排代表那個時段有兩個選項，只能擇一。
+      週三 D2-D4 的統計學與社會學、週一與週五 D2-D4 的待加選課程都是這種情況。</div>
+  </div>
+
+  ${noSlot.length?`<div class="card"><h2>沒有上課時間的項目</h2>
+    <div class="grid">${noSlot.map(n=>`<div class="chip s-todo">
+      <b>${esc(n.entry.name||n.course.name||n.entry.code)}</b>
+      <span class="m">${esc(n.entry.note||'資料裡沒有上課時間')}</span></div>`).join('')}</div></div>`:''}`;
 }
 
 /* ---------- 上課進度 ---------- */
@@ -880,6 +1024,7 @@ function viewPlan(st){
         <div class="cr ${bad?'bad':''}">${cr} 學分${t.state==='current'?'・修習中':''}</div></header>
       ${(t.courses||[]).map((e,i)=>{
         const c=cmap[e.code]||{name:e.code,credits:0};
+        const nm=e.name||c.name;
         const dim = isActive(e)?'':'opacity:.4';
         const tag = (e.status==='confirmed'
             ? '<span class="pill a">已選上</span>'
@@ -887,7 +1032,7 @@ function viewPlan(st){
           + (e.dropIf ? `<span class="pill r">${e.dropIf==='planA'?'抵免過就退':'退選'}</span>` : '');
         return `<div class="chip s-${t.state==='current'?'current':t.state==='done'?'done':'planned'}" style="${dim}">
           <div style="display:flex;justify-content:space-between;gap:6px;align-items:flex-start">
-            <b>${esc(c.name)}</b>
+            <b>${esc(nm)}</b>
             <button class="mini" data-del="${t.id}|${i}" title="移除">×</button></div>
           <span class="m">${c.credits} 學分 ${tag} ${e.slot?'・'+esc(e.slot):''}</span></div>`;
       }).join('')}
@@ -975,7 +1120,7 @@ function viewRecord(st){
         <div class="brow"><span class="n">${t.label}（${t.id}）</span>
           <span class="v">${act.reduce((a,e)=>a+((cmap[e.code]||{}).credits||0),0)} 學分</span></div>
         <div class="tw"><table>${act.map(e=>{const c=cmap[e.code]||{};
-          return `<tr><td>${esc(c.name||e.code)}</td><td class="num">${c.credits??''}</td>
+          return `<tr><td>${esc(e.name||c.name||e.code)}</td><td class="num">${c.credits??''}</td>
           <td>${esc(e.teacher||'')}</td><td>${esc(e.slot||'')}</td>
           <td>${e.status==='confirmed'?'':`<span class="pill p">${STATUS_LABEL[e.status]||e.status}</span>`}</td></tr>`;}).join('')}</table></div>
       </div>`;

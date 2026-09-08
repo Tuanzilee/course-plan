@@ -58,8 +58,8 @@
       "courses": [
         { "code": "01025", "status": "confirmed", "officialCode": "D390201025", "teacher": "蔡群瑞", "room": "ES801", "slot": "二 D2-D4" },
         { "code": "00007-1", "status": "confirmed", "officialCode": "DLT3900007", "teacher": "吳明峰", "room": "ES801", "slot": "一 D5-D6" },
-        { "code": "FL-3", "status": "confirmed", "officialCode": "DFTEN00766A", "teacher": "趙崇任", "room": "LB101", "slot": "二 D5-D6", "note": "課名：外國語文(基礎德文)，開課單位 FT-非英文" },
-        { "code": "PE2-1", "status": "confirmed", "officialCode": "DATP234362A", "teacher": "魏家勁", "slot": "一 D7-D8", "note": "課名：TRX 懸吊訓練，開課單位「體育二以上必」。114 新制大二體育每學期 1 學分，計入畢業學分" },
+        { "code": "FL-3", "status": "confirmed", "name": "外國語文（基礎德文）", "officialCode": "DFTEN00766A", "teacher": "趙崇任", "room": "LB101", "slot": "二 D5-D6", "note": "開課單位 FT-非英文。計入外國語文 8 學分的第 3 段" },
+        { "code": "PE2-1", "status": "confirmed", "name": "TRX 懸吊訓練", "officialCode": "DATP234362A", "teacher": "魏家勁", "slot": "一 D7-D8", "note": "開課單位「體育二以上必」。114 新制大二體育每學期 1 學分，計入畢業學分" },
         { "code": "X-電腦應用", "status": "confirmed", "officialCode": "DNTI804844A", "teacher": "劉富容", "room": "SF337", "slot": "二 D7-D8", "note": "通識，開課單位資訊科技" },
         { "code": "02795", "status": "confirmed", "officialCode": "D390202795", "teacher": "蔡春美", "slot": "三 D5-D6", "note": "導師時間，0 學分" },
         { "code": "33312", "status": "confirmed", "officialCode": "D390133312", "teacher": "邱倚璿", "room": "ES801", "slot": "四 D2-D4", "note": "遠距課程" },
