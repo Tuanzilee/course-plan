@@ -71,6 +71,10 @@
 
 **學期結束** → 把該學期的 `state` 從 `current` 改成 `done`，下一學期改成 `current`。
 
+**改完 `my-record.json` 一定要更新最上面的 `version`**（用當天日期）。瀏覽器裡的
+本機編輯會整個蓋掉檔案的 `terms`，版本不符時載入才會自動丟棄。忘了改的話，
+使用者會看到過期的課表卻不知道原因——這個坑踩過一次。
+
 **新學年排課總表出來** → 用 `pdftotext -layout` 抽文字，更新 `courses.json` 的 `offered`
 與各課 `prereq`（排課總表最後面的「R 課程擋修規定」是擋修的唯一權威來源）。
 新出現的課要補進 `courses` 陣列；`courses.json` 沒有的課，`my-record.json` 的 `extraCourses` 可暫放。

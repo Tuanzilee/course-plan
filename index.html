@@ -189,6 +189,7 @@ table.mtx tr.now th.wk{box-shadow:inset 3px 0 0 var(--accent)}
   <button data-tab="record" aria-selected="false">修課紀錄</button>
 </nav>
 
+<div id="notice"></div>
 <main id="view"></main>
 </div>
 
@@ -205,9 +206,14 @@ Promise.all([
   load('requirements.json'), load('courses.json'), load('my-record.json'), load('syllabus.json')
 ]).then(([req,cat,rec,syl])=>{
   S.req=req; S.cat=cat; S.rec=rec; S.syl=syl;
+  // 本機編輯會整個蓋掉檔案裡的學期資料，所以只接受同一版本的編輯。
+  // 資料更新後（my-record.json 的 version 改了）舊編輯一律丟棄，否則會看到過期的課表。
   try{
     const saved = JSON.parse(localStorage.getItem(LS)||'null');
-    if(saved && saved.terms) S.edits = saved;
+    if(saved && saved.terms){
+      if(saved.version === rec.version) S.edits = saved;
+      else { localStorage.removeItem(LS); S.staleEdits = saved.version || '（更早的版本）'; }
+    }
   }catch(e){}
   if(S.edits) S.rec.terms = S.edits.terms;
   S.scenario = S.rec.scenarios[0].id;
@@ -465,6 +471,29 @@ function render(){
                   map:viewMap, plan:viewPlan, record:viewRecord})[S.tab](st);
   if(S.tab==='plan') wirePlan();
   if(S.tab==='progress') wireProgress();
+  renderNotice();
+}
+
+// 本機編輯與自訂欄序都存在瀏覽器，會蓋掉檔案內容——一定要讓使用者看得見
+function renderNotice(){
+  const el = document.getElementById('notice');
+  if(!el) return;
+  const bits = [];
+  if(S.staleEdits) bits.push({lv:'ok', t:`資料已更新到 ${S.rec.version} 版，${S.staleEdits} 版的本機編輯已自動清除。`});
+  if(S.edits) bits.push({lv:'warn', t:'目前顯示的是這台瀏覽器的本機編輯版本，不是檔案內容。', btn:'還原成檔案內容', act:'edits'});
+  const ord = (S.syl && loadColOrder()) || null;
+  if(ord && ord.length) bits.push({lv:'warn', t:'上課進度的科目順序是自訂的。', btn:'還原預設順序', act:'colorder'});
+  el.innerHTML = bits.map(b=>`<div class="alert ${b.lv}" style="margin-bottom:8px">
+    <span class="tag">提醒</span>
+    <div style="flex:1">${esc(b.t)}</div>
+    ${b.btn?`<button class="act" data-reset="${b.act}">${b.btn}</button>`:''}</div>`).join('');
+  el.querySelectorAll('[data-reset]').forEach(b=>{
+    b.onclick = ()=>{
+      if(b.dataset.reset==='edits') localStorage.removeItem(LS);
+      else saveColOrder(null);
+      location.reload();
+    };
+  });
 }
 
 function barHTML(e,min){
@@ -708,9 +737,11 @@ function progressCourses(){
   });
   // 預設依上課星期排；有自訂順序時照自訂的來，沒排到的課維持預設相對位置
   shown.sort((a,b)=>(a.syl.weekday-b.syl.weekday) || a.syl.name.localeCompare(b.syl.name,'zh-Hant'));
+  // 自訂順序只用來重排，不能決定哪些課出現。用大數而非 Infinity：
+  // Infinity - Infinity 會得到 NaN，讓比較函式行為未定義。
   const ord = loadColOrder();
-  if(ord){
-    const at = c => { const i = ord.indexOf(c); return i<0 ? Infinity : i; };
+  if(ord && ord.length){
+    const at = c => { const i = ord.indexOf(c); return i<0 ? 9999 : i; };
     shown.sort((a,b)=>at(a.code)-at(b.code));
   }
   return {shown, missing};
@@ -1075,7 +1106,7 @@ function wirePlan(){
 }
 
 function persist(){
-  S.edits={terms:S.rec.terms};
+  S.edits={version:S.rec.version, terms:S.rec.terms};
   try{ localStorage.setItem(LS, JSON.stringify(S.edits)); }catch(e){}
 }
 
