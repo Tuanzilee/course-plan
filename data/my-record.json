@@ -8,8 +8,10 @@
   },
 
   "scenarios": [
-    { "id": "planA", "name": "Plan A：抵免核准", "desc": "逾十年課程專案核准，表 A／B／C 全數抵免認列通過。週三時段修社會學。", "pendingAs": "approved" },
-    { "id": "planB", "name": "Plan B：抵免未過", "desc": "逾十年專案未核准，前修科目須全數重修。週三時段改修統計學。", "pendingAs": "rejected" }
+    { "id": "planA", "name": "Plan A：抵免核准", "pendingAs": "approved",
+      "desc": "逾十年專案核准。退掉統計學與數據分析，週三改修社會學，加選心理學實驗法與心理測驗。" },
+    { "id": "planB", "name": "Plan B：抵免未過", "pendingAs": "rejected",
+      "desc": "逾十年專案未核准。維持現在選上的 10 門，前修科目須重修。" }
   ],
 
   "waivers": [
@@ -52,23 +54,29 @@
   "terms": [
     {
       "id": "1151", "label": "大二上", "year": 2, "term": "fall", "state": "current",
-      "source": "2026-09-03 選課系統課表截圖：綠色＝已選上，紫色＝優先群組（志願排序中）",
+      "source": "2026-09-08 選課系統「已選上課程」清單，共 10 門 22 學分",
       "courses": [
-        { "code": "01025", "status": "confirmed", "teacher": "蔡群瑞", "room": "ES801", "slot": "二 D2-D4" },
-        { "code": "00007-1", "status": "confirmed", "teacher": "吳明峰", "room": "ES801", "slot": "一 D5-D6" },
-        { "code": "FL-3", "status": "confirmed", "teacher": "趙崇任", "room": "LB101", "slot": "二 D5-D6", "note": "課名：外國語文(基礎德文)" },
-        { "code": "PE2-1", "status": "confirmed", "slot": "一 D7-D8", "note": "課名：TRX 懸吊訓練。114 新制大二體育每學期 1 學分，計入畢業學分" },
-        { "code": "X-電腦應用", "status": "confirmed", "teacher": "劉富容", "room": "SF337", "slot": "二 D7-D8" },
-        { "code": "02795", "status": "confirmed", "slot": "三 D5", "note": "導師時間，0 學分" },
+        { "code": "01025", "status": "confirmed", "officialCode": "D390201025", "teacher": "蔡群瑞", "room": "ES801", "slot": "二 D2-D4" },
+        { "code": "00007-1", "status": "confirmed", "officialCode": "DLT3900007", "teacher": "吳明峰", "room": "ES801", "slot": "一 D5-D6" },
+        { "code": "FL-3", "status": "confirmed", "officialCode": "DFTEN00766A", "teacher": "趙崇任", "room": "LB101", "slot": "二 D5-D6", "note": "課名：外國語文(基礎德文)，開課單位 FT-非英文" },
+        { "code": "PE2-1", "status": "confirmed", "officialCode": "DATP234362A", "teacher": "魏家勁", "slot": "一 D7-D8", "note": "課名：TRX 懸吊訓練，開課單位「體育二以上必」。114 新制大二體育每學期 1 學分，計入畢業學分" },
+        { "code": "X-電腦應用", "status": "confirmed", "officialCode": "DNTI804844A", "teacher": "劉富容", "room": "SF337", "slot": "二 D7-D8", "note": "通識，開課單位資訊科技" },
+        { "code": "02795", "status": "confirmed", "officialCode": "D390202795", "teacher": "蔡春美", "slot": "三 D5-D6", "note": "導師時間，0 學分" },
+        { "code": "33312", "status": "confirmed", "officialCode": "D390133312", "teacher": "邱倚璿", "room": "ES801", "slot": "四 D2-D4", "note": "遠距課程" },
+        { "code": "36787", "status": "confirmed", "officialCode": "D390136787", "teacher": "王思峯", "room": "ES801", "slot": "四 D5-D7", "note": "遠距＋程式設計課程" },
 
-        { "code": "02222-1", "status": "priority", "teacher": "杜秉叡", "room": "ES401", "slot": "三 D2-D4" },
-        { "code": "33312", "status": "priority", "teacher": "邱倚璿", "room": "ES801", "slot": "四 D2-D4" },
-        { "code": "36787", "status": "priority", "teacher": "王思峯", "room": "ES801", "slot": "四 D5-D7" },
-        { "code": "35959", "status": "priority", "teacher": "洪屹傑", "room": "ES302", "slot": "五 D5-D7" },
-        { "code": "X-人體的奧秘", "status": "priority", "slot": "一 D3-D4" },
+        { "code": "02222-1", "status": "confirmed", "dropIf": "planA", "officialCode": "D390102222", "teacher": "杜秉叡", "room": "ES401", "slot": "三 D2-D4",
+          "note": "抵免核准的話這門不用修，週三同時段改修社會學。課綱標示第 1 週停課" },
+        { "code": "35959", "status": "confirmed", "dropIf": "planA", "officialCode": "D390235959", "teacher": "洪屹傑", "room": "ES302", "slot": "五 D5-D7",
+          "note": "唯一的選修。抵免核准就退選，把學分讓給心理學實驗法與心理測驗" },
 
-        { "code": "07943", "status": "pending_add", "teacher": "黃揚名", "room": "SF237", "slot": "一 D2-D4", "note": "因系統擋修（統計學 6 學分）先行刪除。抵免通過即加選；未通過則依系主任已核可之放行，與統計學同學期併修" },
-        { "code": "01190", "status": "pending_add", "teacher": "高玉靜", "room": "SF237", "slot": "五 D2-D4", "note": "因系統擋修（統計學 6 學分）先行刪除。抵免通過即加選；未通過則依系主任已核可之放行，與統計學同學期併修" }
+        { "code": "01199", "status": "planA", "teacher": "何東洪", "room": "SF237", "slot": "三 D2-D4",
+          "note": "抵免核准後週三改修這門（與統計學同時段二選一）。與經濟學擇一認列核心課程" },
+
+        { "code": "07943", "status": "pending_add", "teacher": "黃揚名", "room": "SF237", "slot": "一 D2-D4",
+          "note": "擋修（統計學 6 學分）系主任已放行但選課系統仍擋，目前未選上。抵免核准即加選；開學第 1 週不論結果都先去上課" },
+        { "code": "01190", "status": "pending_add", "teacher": "高玉靜", "room": "SF237", "slot": "五 D2-D4",
+          "note": "同上，開學第 1 週不論結果都先去上課" }
       ]
     },
     { "id": "1152", "label": "大二下", "year": 2, "term": "spring", "state": "planned", "courses": [
@@ -81,7 +89,6 @@
   ],
 
   "extraCourses": [
-    { "code": "X-電腦應用", "name": "電腦應用", "credits": 2, "bucket": "hol_ge", "kind": "通", "offered": ["fall"], "code_hint": "DNTI804844", "note": "115-1 課綱：通識 2 學分，開課單位資訊科技，劉富容，週二 D7-D8/SF337，無擋修。通識領域別（NT/PT/ST/DT）課綱未載明，暫依開課單位推定為自然與科技" },
-    { "code": "X-人體的奧秘", "name": "人體的奧秘", "credits": 2, "bucket": "hol_ge", "kind": "通", "offered": ["fall"], "code_hint": "DNTD812243", "note": "醫學類學群通識，推定自然與科技領域。2026-09-03 已確認：排除該課的是醫學院(日)臨床心理系，社會科學院(日)心理系未設定排除科目，故可修" }
+    { "code": "X-電腦應用", "name": "電腦應用", "credits": 2, "bucket": "hol_ge", "kind": "通", "offered": ["fall"], "code_hint": "DNTI804844A", "note": "115-1 課綱：通識 2 學分，開課單位資訊科技，劉富容，週二 D7-D8/SF337，無擋修。通識領域別（NT/PT/ST/DT）課綱未載明，暫依開課單位推定為自然與科技" }
   ]
 }

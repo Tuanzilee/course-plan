@@ -90,7 +90,7 @@ th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertic
 th{color:var(--muted);font-weight:600;font-size:12px}
 td.num{text-align:right;font-variant-numeric:tabular-nums}
 .pill{font-size:11px;padding:2px 7px;border-radius:5px;background:var(--gap);color:var(--muted);
-  white-space:nowrap;display:inline-block}
+  white-space:nowrap;display:inline-block;margin:1px 3px 1px 0}
 .tw table.wide{min-width:660px}
 .pill.a{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
 .pill.p{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
@@ -207,6 +207,8 @@ function bucketOf(id){ return S.req.buckets.find(b=>b.id===id); }
 
 // 這門課在目前情境下算不算數
 function isActive(entry){
+  // dropIf：已選上但在某個情境會退掉的課（例：抵免核准就退數據分析）
+  if(entry.dropIf && entry.dropIf===S.scenario) return false;
   if(entry.status==='confirmed') return true;
   if(['tentative','priority','pending_add'].includes(entry.status)) return S.incTentative;
   return entry.status===S.scenario;
@@ -606,7 +608,8 @@ function viewProgress(st){
   for(let n=1;n<=W;n++){
     const hits = shown.map(c=>{
       const w=c.syl.weeks.find(x=>x.n===n);
-      return (w && w.kind==='exam') ? {name:c.syl.name, wd:c.syl.weekday, topic:w.topic, st:c.entry.status} : null;
+      return (w && w.kind==='exam') ? {name:c.syl.name, wd:c.syl.weekday, topic:w.topic,
+        st:c.entry.status, dropIf:c.entry.dropIf} : null;
     }).filter(Boolean).sort((a,b)=>a.wd-b.wd);
     if(hits.length) examRows.push({n, hits});
   }
@@ -633,12 +636,19 @@ function viewProgress(st){
       const hot = r.hits.length>1;
       return `<div class="chip k-exam"${hot?' style="border-left-width:6px"':''}>
         <b>第 ${r.n} 週${hot?`　⚠ ${r.hits.length} 科`:''}</b>
-        <span class="m">${ymd(m)} 那週<br>${r.hits.map(h=>`週${WD[h.wd]}　${esc(h.name)}（${esc(h.topic)}）`).join('<br>')}</span>
+        <span class="m">${ymd(m)} 那週<br>${r.hits.map(h=>{
+          const cond = h.st==='planA' ? '抵免過才修'
+                     : h.st==='planB' ? '抵免沒過才修'
+                     : h.dropIf==='planA' ? '抵免過就退'
+                     : h.st!=='confirmed' ? (STATUS_LABEL[h.st]||h.st) : '';
+          return `週${WD[h.wd]}　${esc(h.name)}（${esc(h.topic)}）${cond?`<span class="pill p">${cond}</span>`:''}`;
+        }).join('<br>')}</span>
       </div>`;
     }).join('')}
     </div>
     <div class="hint">各科期中期末週次不一致是正常的——上課星期不同、遇到的國定假日也不同。認知神經科學導論的期末考排在第 14 週，特別早。
-      標了「優先志願」「待加選」的課還沒確定選上，最後真正要考的可能比這裡少。</div>
+      這一頁列出所有可能會修到的課，所以標了「抵免過才修」「抵免過就退」「待加選」的科目不會同時發生，
+      實際要考的會比這裡少。</div>
   </div>
 
   <div class="card">
@@ -871,8 +881,10 @@ function viewPlan(st){
       ${(t.courses||[]).map((e,i)=>{
         const c=cmap[e.code]||{name:e.code,credits:0};
         const dim = isActive(e)?'':'opacity:.4';
-        const tag = e.status==='confirmed'?'<span class="pill a">已選上</span>'
-          :`<span class="pill p">${STATUS_LABEL[e.status]||e.status}</span>`;
+        const tag = (e.status==='confirmed'
+            ? '<span class="pill a">已選上</span>'
+            : `<span class="pill p">${STATUS_LABEL[e.status]||e.status}</span>`)
+          + (e.dropIf ? `<span class="pill r">${e.dropIf==='planA'?'抵免過就退':'退選'}</span>` : '');
         return `<div class="chip s-${t.state==='current'?'current':t.state==='done'?'done':'planned'}" style="${dim}">
           <div style="display:flex;justify-content:space-between;gap:6px;align-items:flex-start">
             <b>${esc(c.name)}</b>
