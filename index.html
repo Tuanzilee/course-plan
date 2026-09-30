@@ -96,14 +96,14 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 .pill.p{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
 .pill.r{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
 .hint{font-size:12.5px;color:var(--muted);margin-top:8px}
-/* 預習／課堂／複習三顆點 */
+/* 錄音／產出／繳交三顆點 */
 .dots{display:inline-flex;gap:3px;margin-left:6px;vertical-align:1px}
 .dots i{width:6px;height:6px;border-radius:50%;display:block;
   background:var(--gap);border:1px solid color-mix(in srgb,var(--muted) 35%,transparent)}
 .dots i.on{border-color:transparent}
-.dots i[data-s="預習"].on{background:var(--plan)}
-.dots i[data-s="課堂"].on{background:var(--cur)}
-.dots i[data-s="複習"].on{background:var(--accent)}
+.dots i[data-s="錄音"].on{background:var(--plan)}
+.dots i[data-s="產出"].on{background:var(--cur)}
+.dots i[data-s="繳交"].on{background:var(--accent)}
 .wk-row .wd.files{margin-top:4px;font-size:11px;opacity:.8;word-break:break-all}
 /* 課程詳情彈窗 */
 .modal-back{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;display:flex;
@@ -622,29 +622,30 @@ function studyCard(){
   const scanned = (S.log.meta && S.log.meta.scanned) || '尚未掃描';
   const pct = s => total[s].t ? Math.round(total[s].d/total[s].t*100) : 0;
   // 掃不到任何紀錄時別顯示一整排 0%——那不代表沒做，是規則對不上實際檔名
-  if(STAGES.every(s=>total[s].d===0)) return `<div class="card">
+  if(stages().every(s=>total[s].d===0)) return `<div class="card">
     <h2>學習累積</h2>
     <div class="alert warn"><span class="tag">待重做</span><div>
       掃描器在課程資料夾裡找不到符合規則的檔案。這不代表沒有進度——
-      是「預習／課堂／複習」的檔名規則跟實際工作流對不上，追蹤規則正在重新設計。
+      「繳交」要在 <code>_學習紀錄.md</code> 裡手動記，「錄音」與「產出」靠檔名自動偵測。
       <em>最後掃描：${esc(scanned)}</em></div></div>
   </div>`;
-  const COLOR = {預習:'var(--plan)', 課堂:'var(--cur)', 複習:'var(--accent)'};
+  const PALETTE = ['var(--plan)','var(--cur)','var(--accent)'];
+  const COLOR = Object.fromEntries(stages().map((s,i)=>[s, PALETTE[i%PALETTE.length]]));
 
   return `<div class="card">
-    <h2>學習累積　本學期共 ${total.預習.t} 堂正課</h2>
-    ${STAGES.map(s=>`<div class="bucket">
+    <h2>學習累積　本學期共 ${total[stages()[0]].t} 堂正課</h2>
+    ${stages().map(s=>`<div class="bucket">
       <div class="brow"><span class="n">${s}</span>
         <span class="v">${total[s].d} / ${total[s].t} 堂・${pct(s)}%</span></div>
       <div class="bar"><i style="width:${pct(s)}%;background:${COLOR[s]}"></i></div>
     </div>`).join('')}
     <div class="tw" style="margin-top:12px"><table>
-      <tr><th>科目</th><th class="num">預習</th><th class="num">課堂</th><th class="num">複習</th><th>進度</th></tr>
-      ${list.sort((a,b)=>(b.預習+b.課堂+b.複習)-(a.預習+a.課堂+a.複習)).map(r=>`<tr>
+      <tr><th>科目</th>${stages().map(s=>`<th class="num">${s}</th>`).join('')}<th>進度</th></tr>
+      ${list.sort((a,b)=>stages().reduce((x,s)=>x+b[s],0)-stages().reduce((x,s)=>x+a[s],0)).map(r=>`<tr>
         <td>${esc(r.name)}</td>
-        ${STAGES.map(s=>`<td class="num">${r[s]} / ${r.total}</td>`).join('')}
+        ${stages().map(s=>`<td class="num">${r[s]} / ${r.total}</td>`).join('')}
         <td style="min-width:110px"><div class="bar" style="height:8px;margin:4px 0">
-          ${STAGES.map(s=>`<i style="width:${r.total?r[s]/r.total/3*100:0}%;background:${COLOR[s]}"></i>`).join('')}
+          ${stages().map(s=>`<i style="width:${r.total?r[s]/r.total/3*100:0}%;background:${COLOR[s]}"></i>`).join('')}
         </div></td></tr>`).join('')}
     </table></div>
     <div class="hint">分母只算正常上課週，放假、考試、自主學習週不列入。
@@ -660,24 +661,27 @@ function statusOf(code, st){
   return t? (t.state==='done'?'done':t.state==='current'?'current':'planned') : 'planned';
 }
 
-/* ---------- 學習紀錄（預習／課堂／複習） ---------- */
-const STAGES = ['預習','課堂','複習'];
+/* ---------- 學習紀錄（錄音／產出／繳交） ---------- */
+// 階段名稱與順序以 study-log.json 的 meta.stages 為準，改規則時不用動程式
+const DEFAULT_STAGES = ['錄音','產出','繳交'];
+function stages(){ return (S.log && S.log.meta && S.log.meta.stages) || DEFAULT_STAGES; }
 function noteOf(code, n){
   const c = (S.log && S.log.courses && S.log.courses[code]) || null;
   return (c && c[String(n)]) || null;
 }
-// 只有正常上課的週次要做預複習；放假、自主學習週、考試週不列入分母
+// 只有正常上課的週次列入分母；放假、自主學習週、考試週不算
 function isTeachingWeek(w){ return !w.kind; }
 
 function studyStats(){
   const term = S.rec.terms.find(t=>t.id===S.syl.meta.term);
-  const per = {}, total = {預習:{d:0,t:0}, 課堂:{d:0,t:0}, 複習:{d:0,t:0}};
+  const per = {}, total = {};
+  stages().forEach(s=>total[s]={d:0,t:0});
   ((term&&term.courses)||[]).forEach(e=>{
     if(!isActive(e)) return;                       // 依目前情境算，退掉的課不算進分母
     const syl = S.syl.courses[e.code]; if(!syl) return;
     const weeks = syl.weeks.filter(isTeachingWeek);
     const row = {name:(e.name||syl.name), code:e.code, total:weeks.length};
-    STAGES.forEach(st=>{
+    stages().forEach(st=>{
       const done = weeks.filter(w=>{ const r=noteOf(e.code,w.n); return r && r[st]; }).length;
       row[st] = done;
       total[st].d += done; total[st].t += weeks.length;
@@ -690,8 +694,8 @@ function studyStats(){
 function dotsHTML(code, n, w){
   if(w && !isTeachingWeek(w)) return '';
   const r = noteOf(code, n);
-  return `<span class="dots" title="預習／課堂／複習">${
-    STAGES.map(st=>`<i class="${r&&r[st]?'on':''}" data-s="${st}"></i>`).join('')}</span>`;
+  return `<span class="dots" title="${stages().join('／')}">${
+    stages().map(st=>`<i class="${r&&r[st]?'on':''}" data-s="${st}"></i>`).join('')}</span>`;
 }
 
 /* ---------- 課程詳情 ---------- */

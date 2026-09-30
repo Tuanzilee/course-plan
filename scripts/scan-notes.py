@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
-"""掃描課程資料夾，產生 data/study-log.json。
+"""掃描課程資料夾與手動紀錄檔，產生 data/study-log.json。
 
-只記錄「這堂課的預習／課堂／複習產物有沒有做出來」與相對檔名，
+只記錄「這堂課的三個階段做完了沒」與相對檔名，
 不讀取也不儲存任何筆記內容——這個 repo 是公開的。
 
-檔名就是紀錄。三個欄位從檔名解析，跟放在哪個資料夾無關：
+三個階段：
 
-    20260915_人格心理學_W02_預習講義.pdf
-             ~~~~~~~~~~ ~~~ ~~~~~~~~
-             科目        週次  階段
+    錄音  Plaud 的 Highlights／Summary／transcript 進資料夾了
+    產出  自己做的東西寫完了（TTS 口語稿、總結、反思、報告）
+    繳交  課堂要求的都交了（TronClass 上的測驗、討論、互評）
 
-所以扁平放（全部丟在同一個資料夾）或巢狀放（科目/W01_主題/）都能掃，
-不需要為了這支腳本搬檔案。科目在檔名裡找不到時，才退而用最上層資料夾名。
+「錄音」靠檔名自動偵測，「產出」部分自動、「繳交」完全手動——
+因為那些在 TronClass 上交，電腦資料夾裡看不到。
+手動紀錄寫在 <學期>/_學習紀錄.md，格式：
+
+    ## 認知神經科學導論
+    產出：1 2 3
+    繳交：1 2
+
+自動與手動是聯集，掃得到的不用重複記。
 
 用法：
     python3 scripts/scan-notes.py            # 掃描並寫入 data/study-log.json
@@ -22,15 +29,16 @@ import json, os, re, sys, datetime, unicodedata
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 NOTES_ROOT = os.path.expanduser("~/Desktop/P. 進行中專案/FJU psy/02_修課")
+LOG_FILE = "_學習紀錄.md"
 SKIP_DIRS = {"_行政", "_課本", "_課綱", "_封存"}
-# 講義產製過程的中間輸出，不是獨立產物，別重複計入
-SKIP_SUBDIRS = {"pdf-check", "TTS", "tmp", "工作檔"}
+SKIP_SUBDIRS = {"pdf-check", "tmp", "工作檔"}
 
-# 檔名關鍵字 → 階段。順序有意義：「複習講義」也含「講義」，必須先比對複習。
-STAGES = [
-    ("複習", ("複習講義", "複習筆記", "課後整理")),
-    ("課堂", ("課堂筆記", "錄音重點", "疑問清單", "Plaud")),
-    ("預習", ("預習講義", "課前講義", "講義")),
+STAGES = ["錄音", "產出", "繳交"]
+
+# 自動偵測的檔名關鍵字。繳交沒有——那在 TronClass 上，檔案系統看不到。
+AUTO = [
+    ("錄音", ("-Highlights", "-Summary", "-transcript", "Plaud")),
+    ("產出", ("TTS", "口語稿", "總結", "反思", "預習講義", "複習講義")),
 ]
 
 
@@ -39,10 +47,15 @@ def norm(s):
     return unicodedata.normalize("NFC", s)
 
 
+def squash(s):
+    """比對課名時忽略空白與全形空白——實際檔名常有「AI 時代」這種夾空白的寫法。"""
+    return re.sub(r"[\s\u3000]+", "", norm(s))
+
+
 def stage_of(name):
     n = norm(name)
-    for stage, keys in STAGES:
-        if any(k in n for k in keys):
+    for stage, keys in AUTO:
+        if any(k.lower() in n.lower() for k in keys):
             return stage
     return None
 
@@ -52,25 +65,58 @@ def load_name_map(term):
     syl = json.load(open(os.path.join(REPO, "data/syllabus.json"), encoding="utf-8"))
     rec = json.load(open(os.path.join(REPO, "data/my-record.json"), encoding="utf-8"))
     m = {}
+
+    def put(name, code):
+        if name:
+            m[squash(name)] = code
+
     for code, c in syl["courses"].items():
-        m[norm(c["name"])] = code
-        m[norm(c["name"].replace("（上）", "").replace("（下）", ""))] = code
+        put(c["name"], code)
+        put(c["name"].replace("（上）", "").replace("（下）", ""), code)
+        for a in c.get("aliases", []):
+            put(a, code)
     for t in rec["terms"]:
         if t["id"] != term:
             continue
         for e in t.get("courses", []):
-            if e.get("name"):
-                m[norm(e["name"])] = e["code"]
+            put(e.get("name"), e["code"])
     return m
 
 
 def subject_in(text, names_by_len):
-    """在字串裡找課名。長的先比，避免「心理學實驗法」被「心理學」搶走。"""
-    t = norm(text)
+    """在字串裡找課名或別名。長的先比，避免「心理學實驗法」被「心理學」搶走。"""
+    t = squash(text)
     for name in names_by_len:
         if name in t:
             return name
     return None
+
+
+def blank_week():
+    w = {s: False for s in STAGES}
+    w["files"] = []
+    return w
+
+
+def read_manual(root, name_map, names_by_len):
+    """讀 _學習紀錄.md。回傳 {課號: {週次: set(階段)}}。"""
+    path = os.path.join(root, LOG_FILE)
+    if not os.path.isfile(path):
+        return {}, None
+    out, code = {}, None
+    for line in open(path, encoding="utf-8"):
+        line = norm(line).strip()
+        if line.startswith("##"):
+            subj = subject_in(line.lstrip("# ").strip(), names_by_len)
+            code = name_map.get(subj) if subj else None
+            continue
+        m = re.match(r"^(%s)\s*[:：]\s*(.*)$" % "|".join(STAGES), line)
+        if not m or not code:
+            continue
+        stage, rest = m.group(1), m.group(2)
+        for wk in re.findall(r"\d+", rest):
+            out.setdefault(code, {}).setdefault(str(int(wk)), set()).add(stage)
+    return out, path
 
 
 def scan(term, notes_root=None):
@@ -82,6 +128,7 @@ def scan(term, notes_root=None):
 
     courses, skipped = {}, []
 
+    # 1) 檔名自動偵測
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames
                        if not d.startswith(".")
@@ -89,31 +136,35 @@ def scan(term, notes_root=None):
                        and d not in SKIP_SUBDIRS
                        and not d.startswith("rendered")]
         rel_dir = os.path.relpath(dirpath, root)
-        top = "" if rel_dir == "." else norm(rel_dir).split(os.sep)[0]
-        if top in SKIP_DIRS:
+        if norm(rel_dir).split(os.sep)[0] in SKIP_DIRS:
             continue
 
         for fn in filenames:
-            if fn.startswith("."):
+            if fn.startswith(".") or fn == LOG_FILE:
                 continue
             fn_n = norm(fn)
             stage = stage_of(fn_n)
             if not stage:
                 continue
-
-            wk = re.search(r"W(\d{1,2})", fn_n) or re.search(r"W(\d{1,2})", norm(rel_dir))
-            # 科目先從檔名找，找不到再看資料夾路徑
+            wk = (re.search(r"[Ww](\d{1,2})", fn_n)
+                  or re.search(r"[Ww](\d{1,2})", norm(rel_dir)))
             subj = subject_in(fn_n, names_by_len) or subject_in(rel_dir, names_by_len)
             if not wk or not subj:
                 skipped.append({"file": fn_n,
-                                "reason": "檔名缺週次 W##" if not wk else "檔名對不到課名"})
+                                "reason": "檔名缺週次 W##" if not wk else "對不到課名"})
                 continue
-
-            code = name_map[subj]
-            w = courses.setdefault(code, {}).setdefault(
-                str(int(wk.group(1))), {"預習": False, "課堂": False, "複習": False, "files": []})
+            w = courses.setdefault(name_map[subj], {}).setdefault(
+                str(int(wk.group(1))), blank_week())
             w[stage] = True
             w["files"].append(norm(os.path.relpath(os.path.join(dirpath, fn), root)))
+
+    # 2) 手動紀錄，與自動偵測取聯集
+    manual, log_path = read_manual(root, name_map, names_by_len)
+    for code, weeks in manual.items():
+        for wk, stages in weeks.items():
+            w = courses.setdefault(code, {}).setdefault(wk, blank_week())
+            for s in stages:
+                w[s] = True
 
     for weeks in courses.values():
         for w in weeks.values():
@@ -125,8 +176,9 @@ def scan(term, notes_root=None):
             "term": term,
             "scanned": datetime.date.today().isoformat(),
             "root": f"FJU psy/02_修課/{term}",
-            "note": "由 scripts/scan-notes.py 產生。只記錄產物是否存在與相對檔名，不含筆記內容。",
-            "stages": ["預習", "課堂", "複習"],
+            "note": "由 scripts/scan-notes.py 產生。只記錄階段是否完成與相對檔名，不含筆記內容。",
+            "stages": STAGES,
+            "manualFile": LOG_FILE if log_path else None,
             "skipped": skipped,
         },
         "courses": courses,
@@ -139,8 +191,10 @@ if __name__ == "__main__":
     data = scan(term, root)
     n = sum(len(w) for w in data["courses"].values())
     done = sum(1 for w in data["courses"].values() for x in w.values()
-               if x["預習"] and x["課堂"] and x["複習"])
+               if all(x[s] for s in STAGES))
     print(f"掃到 {len(data['courses'])} 科、{n} 個週次，三階段都齊的有 {done} 個")
+    if not data["meta"]["manualFile"]:
+        print(f"  ⚠ 找不到 {LOG_FILE}，繳交與部分產出無法計入")
     for s in data["meta"]["skipped"]:
         print(f"  ⚠ 略過 {s['file']}：{s['reason']}")
     if "--dry-run" in sys.argv:
