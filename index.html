@@ -742,13 +742,19 @@ function openCourseDetail(code){
   // 評分規則：單科的事，但期中期末佔比直接影響該週投入多少，放在詳情裡最有用
   let gradeHTML = '';
   if(syl && (syl.grading||[]).length){
-    const sum = syl.grading.reduce((a,g)=>a+(g.pct||0),0);
+    const g0 = syl.grading;
+    const sum = g0.reduce((a,g)=>a+(g.pct||0),0);
+    const someUnknown = g0.some(g=>g.pct==null);
+    // 已滿 100% 就沒問題——沒標佔比的那些是加分項，本來就不在 100% 裡。
+    // 不足 100% 且有缺值，是資料不全，不是老師算錯，不能報成「不符」。
+    const warn = sum===100 ? ''
+      : someUnknown ? `　<span style="color:var(--muted)">已知 ${sum}%，其餘老師未明示</span>`
+      : `　<span style="color:var(--warn)">合計 ${sum}%，與 100% 不符</span>`;
     gradeHTML = `
-      <h4 style="font-size:13px;color:var(--muted);margin:0 0 8px">評分規則${
-        sum!==100?`　<span style="color:var(--warn)">合計 ${sum}%，與 100% 不符</span>`:''}</h4>
+      <h4 style="font-size:13px;color:var(--muted);margin:0 0 8px">評分規則${warn}</h4>
       <div class="wk-list" style="margin-bottom:16px">
-        ${syl.grading.map(g=>`<div class="wk-row">
-          <div class="wn"><b>${g.pct}%</b></div>
+        ${g0.map(g=>`<div class="wk-row">
+          <div class="wn"><b>${g.pct==null?'—':g.pct+'%'}</b></div>
           <div><div>${esc(g.item)}</div>${g.note?`<div class="wd">${esc(g.note)}</div>`:''}</div>
         </div>`).join('')}
       </div>`;
