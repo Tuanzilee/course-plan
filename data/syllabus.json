@@ -20,38 +20,31 @@
       "weeks": [
         {
           "n": 1,
-          "topic": "課程介紹",
-          "detail": "性格理論的系統觀點／性格理論：從日常到系統性格的科學研究"
+          "topic": "課程介紹、導論與概述"
         },
         {
           "n": 2,
-          "topic": "性格理論",
-          "detail": "心理分析的性格理論"
+          "topic": "性格的科學研究"
         },
         {
           "n": 3,
-          "topic": "性格理論",
-          "detail": "心理分析性格理論的應用"
+          "topic": "心理動力論"
         },
         {
           "n": 4,
-          "topic": "性格理論",
-          "detail": "個人中心的性格理論"
+          "topic": "心理動力論"
         },
         {
           "n": 5,
-          "topic": "性格理論",
-          "detail": "個人中心性格理論的應用"
+          "topic": "現象學理論取向"
         },
         {
           "n": 6,
-          "topic": "性格理論",
-          "detail": "性格特質論"
+          "topic": "現象學理論取向"
         },
         {
           "n": 7,
-          "topic": "性格理論",
-          "detail": "性格特質論的應用"
+          "topic": "特質論"
         },
         {
           "n": 8,
@@ -60,60 +53,82 @@
         },
         {
           "n": 9,
-          "topic": "性格理論",
-          "detail": "電影欣賞與評論"
+          "topic": "性格的生物基礎"
         },
         {
           "n": 10,
-          "topic": "性格理論",
-          "detail": "性格的生理基礎"
+          "topic": "行為主義及學習取向"
         },
         {
           "n": 11,
-          "topic": "性格理論",
-          "detail": "行為取向的性格理論"
+          "topic": "認知取向"
         },
         {
           "n": 12,
-          "topic": "性格理論",
-          "detail": "認知取向的性格理論"
+          "topic": "社會認知論"
         },
         {
           "n": 13,
-          "topic": "性格理論",
-          "detail": "社會認知的性格理論"
+          "topic": "分組討論"
         },
         {
           "n": 14,
-          "topic": "性格理論",
-          "detail": "社會認知性格理論的應用"
+          "topic": "分組討論",
+          "detail": "社會認知論的應用"
         },
         {
           "n": 15,
-          "topic": "性格理論",
-          "detail": "脈絡情境的性格理論"
+          "topic": "我的人格理論",
+          "detail": "期刊個人書面報告 12/25 12:00 前繳交"
         },
         {
           "n": 16,
           "topic": "期末考",
+          "detail": "個人人格理論",
           "kind": "exam"
         },
         {
           "n": 17,
-          "topic": "自我統整",
-          "detail": "自主學習",
+          "topic": "自主學習",
           "kind": "selfstudy"
         },
         {
           "n": 18,
-          "topic": "統整回饋",
-          "detail": "自主學習",
+          "topic": "自主學習",
           "kind": "selfstudy"
         }
       ],
-      "source": "課綱",
+      "source": "課綱更新",
       "aliases": [
         "人格心理學"
+      ],
+      "sourceFile": "1151_人格心理學/1151_人格心理學課程大綱（0915）.png",
+      "updated": "2026-09-14",
+      "note": "課程資訊系統版課綱，含完整評分標準。",
+      "grading": [
+        {
+          "item": "期中考",
+          "pct": 30
+        },
+        {
+          "item": "期末考",
+          "pct": 30,
+          "note": "考個人人格理論：整合本學期人格理論與相關概念"
+        },
+        {
+          "item": "期刊分組口頭報告",
+          "pct": 10
+        },
+        {
+          "item": "期刊個人書面報告",
+          "pct": 10,
+          "note": "600–3,000 字，12/25 12:00 前繳交"
+        },
+        {
+          "item": "出席、課堂參與及隨堂作業",
+          "pct": 20,
+          "note": "缺席達 5 次依學校規定扣考"
+        }
       ]
     },
     "FL-3": {
@@ -533,12 +548,44 @@
         }
       ],
       "source": "交接檔",
-      "sourceFile": "1151_認知神經科學導論/cogneuro-handover.md",
+      "sourceFile": "1151_認知神經科學導論/cogneuro-handover.md（進度）與 20260917_認知神經科學導論評量標準.docx（評分）",
       "updated": "2026-09-23",
       "note": "進度依課堂投影片最新進度表，已取代課綱與 TronClass 舊版。Ch10 The acting brain 不在進度表、不考；第 4 版 Ch06、Ch14 亦不考。評分比例、每週輸送帶與拿分策略見交接檔。",
       "aliases": [
         "認知神經科學",
         "cogneuro"
+      ],
+      "grading": [
+        {
+          "item": "期末考",
+          "pct": 30,
+          "note": "評分標準較嚴格"
+        },
+        {
+          "item": "期中考",
+          "pct": 20,
+          "note": "評分標準較嚴格"
+        },
+        {
+          "item": "課堂活動與分組討論",
+          "pct": 18,
+          "note": "回應提問 8 次以上才到 90–100 分；漏一次同儕互評從總成績扣 1 分"
+        },
+        {
+          "item": "課前知識連結測驗",
+          "pct": 12,
+          "note": "每週四 08:00 前，可考 2 次取高分"
+        },
+        {
+          "item": "課後反思與測驗",
+          "pct": 12,
+          "note": "每週四 12:10 前"
+        },
+        {
+          "item": "實體複習測驗",
+          "pct": 8,
+          "note": "僅第 1、5、10、13 週共 4 次，規則要求全勤"
+        }
       ]
     },
     "36787": {
@@ -549,98 +596,94 @@
       "weeks": [
         {
           "n": 1,
-          "topic": "課程介紹",
-          "detail": "ES801 實體"
+          "topic": "課程介紹與協同學習結構",
+          "detail": "ES801 面授"
         },
         {
           "n": 2,
-          "topic": "AI for Every One",
-          "detail": "Week1 What is AI／Week2 Building AI Projects／Week3 AI in Your Company／Week4 AI and Society（deeplearning.ai 非同步）"
+          "topic": "認識 Machine Learning-based AI",
+          "detail": "4.5 小時，非同步 Self-Paced"
         },
         {
           "n": 3,
-          "topic": "Generative AI for Everyone",
-          "detail": "Week1 Introduction to Generative AI／Week2 Generative AI Projects／Week3 Generative AI in work and life（非同步）"
+          "topic": "認識 Generative AI",
+          "detail": "1.5 小時，非同步"
         },
         {
           "n": 4,
-          "topic": "由 Role Play 角度認識 AI",
-          "detail": "更加貼近心理學應用的視角（Teams 同步）"
+          "topic": "AI 素養(Fluency)與 4D 框架",
+          "detail": "同步 Teams"
         },
         {
           "n": 5,
-          "topic": "Gen AI 素養工作坊(1)",
-          "detail": "(1) prompting 原則與練習／(2) 使用習慣～從作業分享開始（Teams）"
+          "topic": "善用 Gemini Notebook 自主學習",
+          "detail": "同步 Teams＋非同步"
         },
         {
           "n": 6,
-          "topic": "Gen AI 素養工作坊(2)",
-          "detail": "(3) 記憶與專案～自我代理／(4) 自造 GPT～人設立基的 AI 訪談員（Teams）"
+          "topic": "負責任 AI 使用與風險合規",
+          "detail": "非同步 Self-Regulated Learning"
         },
         {
           "n": 7,
-          "topic": "小組協作專案",
-          "detail": "Tronclass 非同步"
+          "topic": "AI 影響與展望",
+          "detail": "含 Agentic AI"
         },
         {
           "n": 8,
-          "topic": "期中成果展示",
-          "detail": "ES801",
+          "topic": "期中考 ＋ 自主學習專案 1",
+          "detail": "ES801 面授",
           "kind": "exam"
         },
         {
           "n": 9,
-          "topic": "AI Python for Beginner(1)",
-          "detail": "Basics of AI Python Coding"
+          "topic": "AI Python for Beginner (1)",
+          "detail": "同步 Teams，Colab 實作"
         },
         {
           "n": 10,
-          "topic": "AI Python for Beginner(2)",
-          "detail": "Automating Tasks with Python"
+          "topic": "AI Python for Beginner (2)"
         },
         {
           "n": 11,
-          "topic": "AI Python for Beginner(3)",
-          "detail": "Working with Your Own Data & Documents in Python"
+          "topic": "AI Python for Beginner (3)"
         },
         {
           "n": 12,
-          "topic": "AI Python for Beginner(4)",
-          "detail": "Extending Python with Packages and APIs"
+          "topic": "AI Python for Beginner (4)"
         },
         {
           "n": 13,
-          "topic": "AI Python 輔助的資料分析示例(1)",
-          "detail": "Teams 同步"
+          "topic": "認識 AI 輔助量化研究入門"
         },
         {
           "n": 14,
-          "topic": "AI Python 輔助的資料分析示例(2)",
-          "detail": "Teams 同步"
+          "topic": "認識 AI 輔助質性研究入門",
+          "detail": "心理×AI 研究觀摩：教師研究團隊分享"
         },
         {
           "n": 15,
-          "topic": "例假日",
-          "kind": "holiday"
+          "topic": "心理×AI 研究觀摩：自主學習專案 2",
+          "detail": "ES801 面授"
         },
         {
           "n": 16,
-          "topic": "例假日",
-          "kind": "holiday"
-        },
-        {
-          "n": 17,
           "topic": "期末考",
-          "detail": "ES801（暫定）",
+          "detail": "筆試＋上機考，LE401(32人) / SF340(28人)",
           "kind": "exam"
         },
         {
+          "n": 17,
+          "topic": "彈性多元學習週",
+          "kind": "selfstudy"
+        },
+        {
           "n": 18,
-          "topic": "彈性週自主學習",
+          "topic": "彈性多元學習週",
           "kind": "selfstudy"
         }
       ],
-      "source": "課綱",
+      "source": "課綱更新＋交接檔",
       "aliases": [
         "AI 應用課",
         "AI應用課",
@@ -648,6 +691,35 @@
         "AI心理應用",
         "AI心理學應用",
         "AI應用"
+      ],
+      "sourceFile": "1151_AI 時代的心理學應用/1151_AI心理應用課綱.pdf 與 1151 AI 心理學應用 — 課程交接檔案.md",
+      "updated": "2026-09",
+      "note": "缺課滿 18 小時不予評分；未請假曠課 1 小時算 3 小時。同步課全在 Teams，最容易滑掉。",
+      "grading": [
+        {
+          "item": "期末考（筆試＋上機考）",
+          "pct": 30,
+          "note": "LE401 / SF340"
+        },
+        {
+          "item": "期中考（筆試）",
+          "pct": 25,
+          "note": "範圍單元 1–6，選擇／是非"
+        },
+        {
+          "item": "自主學習專案 1",
+          "pct": 15
+        },
+        {
+          "item": "自主學習專案 2",
+          "pct": 15,
+          "note": "社群內互評 50% ＋ 代表上台發表由老師評 50%"
+        },
+        {
+          "item": "平日討論區表現",
+          "pct": 15,
+          "note": "純粹是「有沒有出現」的分數"
+        }
       ]
     },
     "35959": {
@@ -860,100 +932,90 @@
       "teacher": "何東洪",
       "weekday": 3,
       "room": "SF237",
-      "note": "只有抵免核准、週三改修這門時才會上到。全學期沒有期中期末考，改以分組報告評量。",
+      "note": "改為讀本進度制，與學期初的質性研究取徑版完全不同。第 17、18 週課綱未列。",
       "weeks": [
         {
           "n": 1,
-          "topic": "心理學質性研究取徑",
-          "detail": "科學與社會人文取徑的分離"
+          "topic": "說明、分配週"
         },
         {
           "n": 2,
-          "topic": "心理學質性研究取徑",
-          "detail": "心理學史與人文社會心理學取徑"
+          "topic": "『社會學與台灣社會』第一、二章"
         },
         {
           "n": 3,
-          "topic": "心理學質性研究取徑",
-          "detail": "現象學與心理學"
+          "topic": "第三、四章"
         },
         {
           "n": 4,
-          "topic": "心理學質性研究取徑",
-          "detail": "文化研究與心理學"
+          "topic": "第五、六章"
         },
         {
           "n": 5,
-          "topic": "心理學質性研究取徑",
-          "detail": "精神分析方法導論"
+          "topic": "第七、八章"
         },
         {
           "n": 6,
-          "topic": "心理學質性研究取徑",
-          "detail": "助人工作的現場理解與詮釋"
+          "topic": "第九、十章"
         },
         {
           "n": 7,
-          "topic": "心理學質性研究取徑",
-          "detail": "民族誌與深刻描述"
+          "topic": "第十一、十二章"
         },
         {
           "n": 8,
-          "topic": "心理學質性研究取徑",
-          "detail": "行動研究"
+          "topic": "第十三、十四章"
         },
         {
           "n": 9,
-          "topic": "分組報告議題討論"
+          "topic": "第十五、十六章"
         },
         {
           "n": 10,
-          "topic": "分組報告議題討論"
+          "topic": "第十七、十八章"
         },
         {
           "n": 11,
-          "topic": "心理學與社會學的對話",
-          "detail": "社會與個人／整體與個體"
+          "topic": "第十九、二十章"
         },
         {
           "n": 12,
-          "topic": "心理學與人類學的對話",
-          "detail": "詮釋行動與意義"
+          "topic": "『平台資本主義』序到引言"
         },
         {
           "n": 13,
-          "topic": "心理學與精神分析對話",
-          "detail": "主體／慾望／社會苦痛探究"
+          "topic": "第一章"
         },
         {
           "n": 14,
-          "topic": "心理學與文化研究對話",
-          "detail": "認同問題的探究"
+          "topic": "第二章"
         },
         {
           "n": 15,
-          "topic": "學生分組報告",
-          "kind": "exam"
+          "topic": "第三章"
         },
         {
           "n": 16,
-          "topic": "學生分組報告",
+          "topic": "期末考：筆試",
           "kind": "exam"
         },
         {
           "n": 17,
-          "topic": "學生分組報告",
-          "kind": "exam"
+          "topic": "課綱未列",
+          "kind": "selfstudy"
         },
         {
           "n": 18,
-          "topic": "期末盤整進度"
+          "topic": "課綱未列",
+          "kind": "selfstudy"
         }
       ],
-      "source": "課綱",
+      "source": "課綱更新",
       "aliases": [
         "社會學"
-      ]
+      ],
+      "sourceFile": "1151_社會學/1151_社會學課程大綱.png",
+      "updated": "2026-09"
     },
     "07943": {
       "name": "心理學實驗法",
@@ -969,64 +1031,63 @@
         },
         {
           "n": 2,
-          "topic": "課程介紹",
-          "detail": "Ch1（Teams 上課）"
+          "topic": "Ch2 Ch3"
         },
         {
           "n": 3,
-          "topic": "教師節補假",
+          "topic": "教師節",
           "kind": "holiday"
         },
         {
           "n": 4,
-          "topic": "中秋節放假",
-          "kind": "holiday"
+          "topic": "Ch3 Ch4"
         },
         {
           "n": 5,
-          "topic": "Ch3"
+          "topic": "Ch5 Ch6"
         },
         {
           "n": 6,
-          "topic": "Ch4"
+          "topic": "Ch6 Ch7"
         },
         {
           "n": 7,
-          "topic": "Ch5"
+          "topic": "光復節補假",
+          "kind": "holiday"
         },
         {
           "n": 8,
-          "topic": "Ch6 & 7"
-        },
-        {
-          "n": 9,
           "topic": "期中考",
           "kind": "exam"
         },
         {
-          "n": 10,
+          "n": 9,
           "topic": "Ch8"
         },
         {
+          "n": 10,
+          "topic": "Ch9 Ch10"
+        },
+        {
           "n": 11,
-          "topic": "Ch9"
+          "topic": "Ch10"
         },
         {
           "n": 12,
+          "topic": "Ch11"
+        },
+        {
+          "n": 13,
           "topic": "校慶補假",
           "kind": "holiday"
         },
         {
-          "n": 13,
-          "topic": "Ch10"
-        },
-        {
           "n": 14,
-          "topic": "Ch11 & Ch12"
+          "topic": "Ch12"
         },
         {
           "n": 15,
-          "topic": "Ch12、Ch13 & 14"
+          "topic": "Ch13 Ch14"
         },
         {
           "n": 16,
@@ -1035,19 +1096,22 @@
         },
         {
           "n": 17,
-          "topic": "彈性自主學習週",
+          "topic": "自主學習週一",
           "kind": "selfstudy"
         },
         {
           "n": 18,
-          "topic": "彈性自主學習週",
+          "topic": "自主學習週二",
           "kind": "selfstudy"
         }
       ],
-      "source": "課綱",
+      "source": "課綱更新",
       "aliases": [
         "實驗法"
-      ]
+      ],
+      "sourceFile": "1151_心理學實驗法/1151_心理學實驗法課綱.png",
+      "updated": "2026-09",
+      "note": "進度依課堂發布的日期版課綱，已取代學期初版本。"
     },
     "01190": {
       "name": "心理測驗",
@@ -1057,94 +1121,112 @@
       "weeks": [
         {
           "n": 1,
-          "topic": "Introduction to Psychological Testing"
+          "topic": "導論"
         },
         {
           "n": 2,
-          "topic": "Tests and Measurements",
-          "detail": "Ch.1"
+          "topic": "中秋節放假",
+          "kind": "holiday"
         },
         {
           "n": 3,
-          "topic": "心理屬性的定義與測量：能力、興趣與人格",
-          "detail": "Ch.2　Defining and Measuring Psychological Attributes"
+          "topic": "心理構念界定與測量",
+          "detail": "理解測驗 I"
         },
         {
           "n": 4,
-          "topic": "Testing and Society",
-          "detail": "Ch.3"
+          "topic": "國慶日放假",
+          "kind": "holiday"
         },
         {
           "n": 5,
-          "topic": "測量與統計的基本概念",
-          "detail": "Ch.4"
+          "topic": "量尺轉換與常模"
         },
         {
           "n": 6,
-          "topic": "量尺、轉換與常模",
-          "detail": "Ch.5　Scales, Transformations, and Norms"
+          "topic": "信度",
+          "detail": "理解測驗 II"
         },
         {
           "n": 7,
-          "topic": "信度：測驗分數的一致性",
-          "detail": "Ch.6　Reliability"
+          "topic": "信度 II ＆ 測量效度"
         },
         {
           "n": 8,
-          "topic": "信度資訊的使用與解釋",
-          "detail": "Ch.7"
+          "topic": "決策效度",
+          "detail": "理解測驗 III"
         },
         {
           "n": 9,
-          "topic": "期中考",
-          "detail": "Midterm Exam",
-          "kind": "exam"
+          "topic": "試題分析",
+          "detail": "作業 I"
         },
         {
           "n": 10,
-          "topic": "測量效度：內容與構念導向的驗證策略",
-          "detail": "Ch.8"
+          "topic": "期中考筆試",
+          "kind": "exam"
         },
         {
           "n": 11,
-          "topic": "決策效度：效標關聯效度",
-          "detail": "Ch.9"
+          "topic": "小組心測實作報告說明、諮詢與討論"
         },
         {
           "n": 12,
-          "topic": "專業心理測驗演練 I"
+          "topic": "報告準備週，不上課",
+          "kind": "holiday"
         },
         {
           "n": 13,
-          "topic": "專業心理測驗演練 II"
+          "topic": "小組心理測驗實作口頭報告 I",
+          "kind": "exam"
         },
         {
           "n": 14,
-          "topic": "專業心理測驗演練 III"
+          "topic": "小組心理測驗實作口頭報告 II",
+          "kind": "exam"
         },
         {
           "n": 15,
-          "topic": "專業心理測驗演練 IV"
+          "topic": "行憲紀念日放假",
+          "kind": "holiday"
         },
         {
           "n": 16,
-          "topic": "Item Analysis",
-          "detail": "Ch.10"
+          "topic": "放假",
+          "detail": "課綱寫「國慶日」但日期為 1/1，應為元旦誤植",
+          "kind": "holiday"
         },
         {
           "n": 17,
-          "topic": "Item Analysis（SPSS 實作課程）"
+          "topic": "課綱未列",
+          "kind": "selfstudy"
         },
         {
           "n": 18,
-          "topic": "期末考",
-          "detail": "Final Exam",
-          "kind": "exam"
+          "topic": "課綱未列",
+          "kind": "selfstudy"
         }
       ],
-      "source": "課綱",
+      "source": "課綱更新",
       "aliases": [
         "心測"
+      ],
+      "sourceFile": "1151_心理測驗/1151_心理測驗課程大綱.pdf",
+      "updated": "2026-09",
+      "note": "改為日期進度制。**沒有期末考**，改以小組心測實作口頭與書面報告評量。第 17、18 週課綱未列。",
+      "grading": [
+        {
+          "item": "3 次隨堂測驗與 1 次隨堂作業",
+          "pct": 40
+        },
+        {
+          "item": "期中考筆試",
+          "pct": 30
+        },
+        {
+          "item": "心測實作口頭（含教師及同儕互評）與書面報告",
+          "pct": 30
+        }
       ]
     }
   },

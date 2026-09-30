@@ -731,13 +731,28 @@ function openCourseDetail(code){
   const waiver = (S.rec.waivers||[]).find(w=>w.course===code && w.status==='approved');
   if(waiver) add('擋修放行', `<span class="pill a">已核可</span> ${esc(waiver.note)}`);
   add('開課學期', (c.offered||[]).map(o=>o==='fall'?'第一學期':'第二學期').join('／'));
-  if(syl) add('進度來源', syl.source==='交接檔'
-    ? `<span class="pill a">交接檔</span>${syl.updated?' 更新於 '+esc(syl.updated):''}`
+  if(syl) add('進度來源', (syl.source||'').includes('交接檔') || (syl.source||'').includes('更新')
+    ? `<span class="pill a">${esc(syl.source)}</span>${syl.updated?' 更新於 '+esc(syl.updated):''}`
       + (syl.sourceFile?`<div class="hint" style="margin:2px 0 0">${esc(syl.sourceFile)}</div>`:'')
     : `<span class="pill">課綱</span><span class="hint" style="margin:0">　學期初版本，老師課堂上改過就會失準</span>`);
   if(c.suggested) add('必修表建議', `${'一二三四'[c.suggested.year-1]}年級${c.suggested.term==='fall'?'上':'下'}學期`);
 
   const notes = [...new Set([entry.note, c.note, syl&&syl.note].filter(Boolean))];
+
+  // 評分規則：單科的事，但期中期末佔比直接影響該週投入多少，放在詳情裡最有用
+  let gradeHTML = '';
+  if(syl && (syl.grading||[]).length){
+    const sum = syl.grading.reduce((a,g)=>a+(g.pct||0),0);
+    gradeHTML = `
+      <h4 style="font-size:13px;color:var(--muted);margin:0 0 8px">評分規則${
+        sum!==100?`　<span style="color:var(--warn)">合計 ${sum}%，與 100% 不符</span>`:''}</h4>
+      <div class="wk-list" style="margin-bottom:16px">
+        ${syl.grading.map(g=>`<div class="wk-row">
+          <div class="wn"><b>${g.pct}%</b></div>
+          <div><div>${esc(g.item)}</div>${g.note?`<div class="wd">${esc(g.note)}</div>`:''}</div>
+        </div>`).join('')}
+      </div>`;
+  }
 
   let weeksHTML = '';
   if(syl){
@@ -779,6 +794,7 @@ function openCourseDetail(code){
     <div class="modal-bd">
       <dl class="kv">${rows.join('')}</dl>
       ${notes.length?`<div class="hint" style="margin:0 0 14px">${notes.map(esc).join('<br>')}</div>`:''}
+      ${gradeHTML}
       ${weeksHTML}
     </div>
   </div>`;
@@ -1056,8 +1072,8 @@ function viewProgress(st){
           <div>${esc(c.syl.name)}</div>
           <div class="th-sub">週${WD[c.syl.weekday]}${c.syl.teacher?'・'+esc(c.syl.teacher):''}</div>
           ${c.entry.status!=='confirmed'?`<div class="th-sub"><span class="pill p">${STATUS_LABEL[c.entry.status]||c.entry.status}</span></div>`:''}
-          <div class="th-sub"><span class="pill ${c.syl.source==='交接檔'?'a':''}"
-            title="${c.syl.source==='交接檔'?'課堂滾動更新，權威性高於課綱':'學期初課綱，內容可能已經過期'}"
+          <div class="th-sub"><span class="pill ${c.syl.source!=='課綱'?'a':''}"
+            title="${c.syl.source!=='課綱'?'已依課堂最新版更新':'學期初課綱，內容可能已經過期'}"
             >${esc(c.syl.source||'課綱')}</span></div></th>`).join('')}
       </tr></thead>
       <tbody>
