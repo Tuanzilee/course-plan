@@ -255,7 +255,7 @@ Promise.all([
     }
   }catch(e){}
   if(S.edits) S.rec.terms = S.edits.terms;
-  S.scenario = S.rec.scenarios[0].id;
+  S.scenario = (S.rec.scenarios && S.rec.scenarios[0]) ? S.rec.scenarios[0].id : null;
   document.getElementById('subtitle').textContent =
     `${req.meta.school}${req.meta.dept}・${req.meta.cohort} 學年度必修科目表・畢業 ${req.meta.totalCredits} 學分`;
   buildScenarioSeg();
@@ -287,8 +287,9 @@ function isActive(entry){
 function transferActive(item){
   if(item.status==='approved') return true;
   if(item.status==='rejected') return false;
-  const sc = S.rec.scenarios.find(s=>s.id===S.scenario);
-  return sc && sc.pendingAs==='approved';
+  // 還在審核中的項目才看情境；抵免定案後 scenarios 會被移除
+  const sc = (S.rec.scenarios||[]).find(s=>s.id===S.scenario);
+  return !!(sc && sc.pendingAs==='approved');
 }
 
 // 溢流順序：某桶修滿後，多的學分往下一個桶算
@@ -487,6 +488,7 @@ function checks(st){
 /* ---------- 畫面 ---------- */
 function buildScenarioSeg(){
   const el=document.getElementById('scenarioSeg');
+  if(!(S.rec.scenarios||[]).length){ el.innerHTML=''; return; }   // 定案後不顯示切換
   el.innerHTML = S.rec.scenarios.map(s=>
     `<button data-sc="${s.id}" title="${s.desc}" aria-pressed="${s.id===S.scenario}">${s.name}</button>`).join('');
   el.onclick=e=>{const b=e.target.closest('button'); if(!b)return;
@@ -564,7 +566,8 @@ function viewOverview(st){
     <div class="hero">
       <div>
         <div class="big">${total}<small> / ${need} 學分</small></div>
-        <div class="sub">${S.rec.scenarios.find(s=>s.id===S.scenario).desc}</div>
+        <div class="sub">${esc((S.rec.scenarios||[]).find(s=>s.id===S.scenario)?.desc
+          || S.rec.transfer.note || '')}</div>
       </div>
       <div class="kpis">
         <div class="kpi"><b style="color:var(--transfer)">${t[0]}</b><span>學分抵免</span></div>
@@ -618,6 +621,14 @@ function studyCard(){
   if(!list.length) return '';
   const scanned = (S.log.meta && S.log.meta.scanned) || '尚未掃描';
   const pct = s => total[s].t ? Math.round(total[s].d/total[s].t*100) : 0;
+  // 掃不到任何紀錄時別顯示一整排 0%——那不代表沒做，是規則對不上實際檔名
+  if(STAGES.every(s=>total[s].d===0)) return `<div class="card">
+    <h2>學習累積</h2>
+    <div class="alert warn"><span class="tag">待重做</span><div>
+      掃描器在課程資料夾裡找不到符合規則的檔案。這不代表沒有進度——
+      是「預習／課堂／複習」的檔名規則跟實際工作流對不上，追蹤規則正在重新設計。
+      <em>最後掃描：${esc(scanned)}</em></div></div>
+  </div>`;
   const COLOR = {預習:'var(--plan)', 課堂:'var(--cur)', 複習:'var(--accent)'};
 
   return `<div class="card">
@@ -716,6 +727,10 @@ function openCourseDetail(code){
   const waiver = (S.rec.waivers||[]).find(w=>w.course===code && w.status==='approved');
   if(waiver) add('擋修放行', `<span class="pill a">已核可</span> ${esc(waiver.note)}`);
   add('開課學期', (c.offered||[]).map(o=>o==='fall'?'第一學期':'第二學期').join('／'));
+  if(syl) add('進度來源', syl.source==='交接檔'
+    ? `<span class="pill a">交接檔</span>${syl.updated?' 更新於 '+esc(syl.updated):''}`
+      + (syl.sourceFile?`<div class="hint" style="margin:2px 0 0">${esc(syl.sourceFile)}</div>`:'')
+    : `<span class="pill">課綱</span><span class="hint" style="margin:0">　學期初版本，老師課堂上改過就會失準</span>`);
   if(c.suggested) add('必修表建議', `${'一二三四'[c.suggested.year-1]}年級${c.suggested.term==='fall'?'上':'下'}學期`);
 
   const notes = [...new Set([entry.note, c.note, syl&&syl.note].filter(Boolean))];
@@ -876,11 +891,10 @@ function viewTimetable(st){
     <div class="legend" style="margin-top:12px">
       <span><i style="background:var(--cur)"></i>已選上</span>
       <span><i style="background:var(--plan)"></i>待加選（實驗法、心測）</span>
-      <span><i style="background:var(--transfer)"></i>情境替代（抵免過才修）</span>
-      <span><i style="background:var(--bad)"></i>抵免過就退</span>
+      <span><i style="background:var(--transfer)"></i>情境替代</span>
+      <span><i style="background:var(--bad)"></i>將退選</span>
     </div>
-    <div class="hint">點任一堂課看完整資訊與逐週進度。同一格並排代表那個時段有兩個選項，只能擇一——
-      週三 D2-D4 的統計學與社會學、週一與週五 D2-D4 的待加選課程都是這種情況。</div>
+    <div class="hint">點任一堂課看完整資訊與逐週進度。同一格並排代表那個時段有兩個選項，只能擇一。</div>
   </div>
 
   ${noSlot.length?`<div class="card"><h2>沒有上課時間的項目</h2>
@@ -1017,9 +1031,8 @@ function viewProgress(st){
       </div>`;
     }).join('')}
     </div>
-    <div class="hint">各科期中期末週次不一致是正常的——上課星期不同、遇到的國定假日也不同。認知神經科學導論的期末考排在第 14 週，特別早。
-      這一頁列出所有可能會修到的課，所以標了「抵免過才修」「抵免過就退」「待加選」的科目不會同時發生，
-      實際要考的會比這裡少。</div>
+    <div class="hint">各科期中期末週次不一致是正常的——上課星期不同、遇到的國定假日也不同。
+      這份彙整只跟逐週進度一樣準：標「課綱」的科目還停在學期初版本，老師改過考程就會失真。</div>
   </div>
 
   <div class="card">
@@ -1038,7 +1051,10 @@ function viewProgress(st){
           </div>
           <div>${esc(c.syl.name)}</div>
           <div class="th-sub">週${WD[c.syl.weekday]}${c.syl.teacher?'・'+esc(c.syl.teacher):''}</div>
-          ${c.entry.status!=='confirmed'?`<div class="th-sub"><span class="pill p">${STATUS_LABEL[c.entry.status]||c.entry.status}</span></div>`:''}</th>`).join('')}
+          ${c.entry.status!=='confirmed'?`<div class="th-sub"><span class="pill p">${STATUS_LABEL[c.entry.status]||c.entry.status}</span></div>`:''}
+          <div class="th-sub"><span class="pill ${c.syl.source==='交接檔'?'a':''}"
+            title="${c.syl.source==='交接檔'?'課堂滾動更新，權威性高於課綱':'學期初課綱，內容可能已經過期'}"
+            >${esc(c.syl.source||'課綱')}</span></div></th>`).join('')}
       </tr></thead>
       <tbody>
       ${Array.from({length:W},(_,i)=>i+1).map(n=>{
@@ -1058,7 +1074,8 @@ function viewProgress(st){
       <span><i style="background:color-mix(in srgb,var(--cur) 25%,transparent)"></i>自主學習週</span>
     </div>
     <div class="hint">點有底線的格子看課程說明。日期依統計學課綱標示的週次日期推算：第 1 週為 ${S.syl.meta.week1Monday} 起。
-      這一頁固定顯示這學期所有有課綱的課，不受上方「計入未確定課程」開關影響——那個開關只管學分怎麼算。</div>
+      這一頁固定顯示這學期所有有課綱的課。標「交接檔」的科目是課堂滾動更新的版本；
+      標「課綱」的還停在學期初，老師改過進度就會失準。</div>
   </div>
 
   ${missing.length?`<div class="card"><h2>沒有課綱進度資料的課</h2>

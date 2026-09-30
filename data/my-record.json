@@ -1,7 +1,6 @@
 {
-  "version": "2026-09-08",
+  "version": "2026-09-30",
   "versionNote": "資料改版時要更新這個日期。瀏覽器裡的本機編輯若不是對應這個版本，載入時會自動丟棄，避免舊編輯蓋掉更新後的資料。",
-
   "student": {
     "dept": "輔仁大學心理學系",
     "entry": "115 學年度轉入二年級（轉學生）",
@@ -9,89 +8,434 @@
     "yearsAllowed": 3,
     "prevCredits": 72
   },
-
-  "scenarios": [
-    { "id": "planA", "name": "Plan A：抵免核准", "pendingAs": "approved",
-      "desc": "逾十年專案核准。退掉統計學與數據分析，週三改修社會學，加選心理學實驗法與心理測驗。" },
-    { "id": "planB", "name": "Plan B：抵免未過", "pendingAs": "rejected",
-      "desc": "逾十年專案未核准。維持現在選上的 10 門，前修科目須重修。" }
-  ],
-
   "waivers": [
-    { "course": "01190", "type": "prereq", "status": "approved", "note": "心理測驗擋修（統計學 6 學分）系主任已放行，與抵免申請結果無關" },
-    { "course": "07943", "type": "prereq", "status": "approved", "note": "心理學實驗法擋修（統計學 6 學分）系主任已放行，與抵免申請結果無關" }
+    {
+      "course": "01190",
+      "type": "prereq",
+      "status": "approved",
+      "note": "心理測驗擋修（統計學 6 學分）系主任已放行，與抵免申請結果無關"
+    },
+    {
+      "course": "07943",
+      "type": "prereq",
+      "status": "approved",
+      "note": "心理學實驗法擋修（統計學 6 學分）系主任已放行，與抵免申請結果無關"
+    }
   ],
-
   "transfer": {
-    "status": "pending",
+    "status": "settled",
     "submitted": "2026-09-01 正式親送系主任提出申請",
-    "note": "系主任已先行看過檔案未表示反對，但不等於正式核可。2026-09-03 確認仍在審核中。",
+    "note": "部分核准：只有普通心理學、統計學、發展心理學三項通過，其餘全數未核准。",
     "modeNote": "mode=credit（學分抵免）：免上課且學分直接計入畢業學分。mode=exempt（科目認列／免修）：免上課但不給學分，該學分空缺必須另修其他課程補足。modeConfirmed=false 表示這一項屬抵免或認列尚未經教務處確認，暫依申請書文字推定。",
     "items": [
-      { "table": "A", "type": "抵免", "mode": "credit", "modeConfirmed": true, "from": "普通心理學", "credits": 6, "bucket": "dept_core", "satisfies": ["00042-1", "00042-2"], "status": "pending", "note": "申請書壹、一明列為學分抵免" },
-      { "table": "A", "type": "抵免", "mode": "credit", "modeConfirmed": true, "from": "心理及教育統計學", "credits": 6, "bucket": "dept_core", "satisfies": ["02222-1", "02222-2"], "status": "pending", "note": "申請書壹、一明列為學分抵免" },
-
-      { "table": "B", "type": "認列", "mode": "exempt", "modeConfirmed": false, "from": "國文", "credits": 4, "bucket": "hol_basic", "satisfies": ["00001-1", "00001-2"], "status": "pending", "note": "申請書壹、二將表 B 列為學分認列。若確為認列則免修但不給學分，4 學分須另修課程補足" },
-      { "table": "B", "type": "認列", "mode": "exempt", "modeConfirmed": false, "from": "英文（一）讀本＋語練", "credits": 4, "bucket": "hol_basic", "status": "pending", "note": "免修的是「大一英文」這門課，不是外國語文 8 學分的要求。補足學分必須改選修第二外語或英文系專班，因此外國語文 8 學分照修不誤，只是全部改成德文——故不標 satisfies" },
-      { "table": "B", "type": "認列", "mode": "exempt", "modeConfirmed": true, "from": "資訊概論", "credits": 0, "bucket": "hol_basic", "satisfies": ["IT"], "status": "pending", "note": "資訊基本能力係透過檢定認證通過畢業門檻，本來就不提供學分，無空缺" },
-      { "table": "B", "type": "認列", "mode": "exempt", "modeConfirmed": false, "from": "西方歷史與人文", "credits": 2, "bucket": "hol_ge", "geDomain": "ge_hum", "status": "pending" },
-      { "table": "B", "type": "認列", "mode": "exempt", "modeConfirmed": false, "from": "傳播學導論", "credits": 2, "bucket": "hol_ge", "geDomain": "ge_soc", "status": "pending" },
-      { "table": "B", "type": "認列", "mode": "exempt", "modeConfirmed": false, "from": "生活與科學的交會", "credits": 2, "bucket": "hol_ge", "geDomain": "ge_nat", "status": "pending" },
-      { "table": "B", "type": "認列", "mode": "exempt", "modeConfirmed": true, "from": "體育 4 門", "credits": 0, "bucket": "hol_core", "satisfies": ["PE1-1", "PE1-2"], "status": "pending", "note": "大一體育本為 0 學分，無空缺。大二體育每學期 1 學分須自行修習（115-1 已修 TRX 懸吊訓練）" },
-
-      { "table": "C", "type": "認列", "mode": "exempt", "modeConfirmed": true, "from": "發展心理學", "credits": 3, "bucket": "dept_core", "satisfies": ["00043"], "status": "pending", "note": "申請書明示不主張內容相同，僅申請學分認列。免修但不給學分，3 學分須另補" },
-      { "table": "C", "type": "認列", "mode": "credit", "modeConfirmed": false, "from": "普通數學", "credits": 3, "bucket": "elec_free", "status": "pending" },
-      { "table": "C", "type": "認列", "mode": "credit", "modeConfirmed": false, "from": "微積分", "credits": 3, "bucket": "elec_free", "status": "pending" },
-      { "table": "C", "type": "認列", "mode": "credit", "modeConfirmed": false, "from": "生物學", "credits": 2, "bucket": "elec_free", "status": "pending" },
-      { "table": "C", "type": "認列", "mode": "credit", "modeConfirmed": false, "from": "法文（一）", "credits": 6, "bucket": "elec_free", "status": "pending" },
-      { "table": "C", "type": "認列", "mode": "credit", "modeConfirmed": false, "from": "西洋文學概論", "credits": 3, "bucket": "elec_free", "status": "pending" },
-      { "table": "C", "type": "認列", "mode": "credit", "modeConfirmed": false, "from": "英文閱讀與會話", "credits": 4, "bucket": "elec_free", "status": "pending" },
-      { "table": "C", "type": "認列", "mode": "credit", "modeConfirmed": false, "from": "英美文學作品導讀", "credits": 2, "bucket": "elec_free", "status": "pending" },
-      { "table": "C", "type": "認列", "mode": "credit", "modeConfirmed": false, "from": "英語語音學", "credits": 4, "bucket": "elec_free", "status": "pending" },
-      { "table": "C", "type": "認列", "mode": "credit", "modeConfirmed": false, "from": "英文文法與習作", "credits": 4, "bucket": "elec_free", "status": "pending" },
-      { "table": "C", "type": "認列", "mode": "credit", "modeConfirmed": false, "from": "管樂合奏（一）", "credits": 1, "bucket": "elec_free", "status": "pending" },
-      { "table": "C", "type": "認列", "mode": "credit", "modeConfirmed": false, "from": "生理學", "credits": 2, "bucket": "elec_free", "status": "pending", "note": "與本校生理心理學分屬不同學科，不主張抵免，僅申請外系自由選修認列" }
-    ]
+      {
+        "table": "A",
+        "type": "抵免",
+        "mode": "credit",
+        "modeConfirmed": true,
+        "from": "普通心理學",
+        "credits": 6,
+        "bucket": "dept_core",
+        "satisfies": [
+          "00042-1",
+          "00042-2"
+        ],
+        "status": "approved",
+        "note": "申請書壹、一明列為學分抵免"
+      },
+      {
+        "table": "A",
+        "type": "抵免",
+        "mode": "credit",
+        "modeConfirmed": true,
+        "from": "心理及教育統計學",
+        "credits": 6,
+        "bucket": "dept_core",
+        "satisfies": [
+          "02222-1",
+          "02222-2"
+        ],
+        "status": "approved",
+        "note": "申請書壹、一明列為學分抵免"
+      },
+      {
+        "table": "B",
+        "type": "認列",
+        "mode": "exempt",
+        "modeConfirmed": false,
+        "from": "國文",
+        "credits": 4,
+        "bucket": "hol_basic",
+        "satisfies": [
+          "00001-1",
+          "00001-2"
+        ],
+        "status": "rejected",
+        "note": "申請書壹、二將表 B 列為學分認列。若確為認列則免修但不給學分，4 學分須另修課程補足"
+      },
+      {
+        "table": "B",
+        "type": "認列",
+        "mode": "exempt",
+        "modeConfirmed": false,
+        "from": "英文（一）讀本＋語練",
+        "credits": 4,
+        "bucket": "hol_basic",
+        "status": "rejected",
+        "note": "免修的是「大一英文」這門課，不是外國語文 8 學分的要求。補足學分必須改選修第二外語或英文系專班，因此外國語文 8 學分照修不誤，只是全部改成德文——故不標 satisfies"
+      },
+      {
+        "table": "B",
+        "type": "認列",
+        "mode": "exempt",
+        "modeConfirmed": true,
+        "from": "資訊概論",
+        "credits": 0,
+        "bucket": "hol_basic",
+        "satisfies": [
+          "IT"
+        ],
+        "status": "rejected",
+        "note": "資訊基本能力係透過檢定認證通過畢業門檻，本來就不提供學分，無空缺"
+      },
+      {
+        "table": "B",
+        "type": "認列",
+        "mode": "exempt",
+        "modeConfirmed": false,
+        "from": "西方歷史與人文",
+        "credits": 2,
+        "bucket": "hol_ge",
+        "geDomain": "ge_hum",
+        "status": "rejected"
+      },
+      {
+        "table": "B",
+        "type": "認列",
+        "mode": "exempt",
+        "modeConfirmed": false,
+        "from": "傳播學導論",
+        "credits": 2,
+        "bucket": "hol_ge",
+        "geDomain": "ge_soc",
+        "status": "rejected"
+      },
+      {
+        "table": "B",
+        "type": "認列",
+        "mode": "exempt",
+        "modeConfirmed": false,
+        "from": "生活與科學的交會",
+        "credits": 2,
+        "bucket": "hol_ge",
+        "geDomain": "ge_nat",
+        "status": "rejected"
+      },
+      {
+        "table": "B",
+        "type": "認列",
+        "mode": "exempt",
+        "modeConfirmed": true,
+        "from": "體育 4 門",
+        "credits": 0,
+        "bucket": "hol_core",
+        "satisfies": [
+          "PE1-1",
+          "PE1-2"
+        ],
+        "status": "rejected",
+        "note": "大一體育本為 0 學分，無空缺。大二體育每學期 1 學分須自行修習（115-1 已修 TRX 懸吊訓練）"
+      },
+      {
+        "table": "C",
+        "type": "認列",
+        "mode": "credit",
+        "modeConfirmed": false,
+        "from": "發展心理學",
+        "credits": 3,
+        "bucket": "dept_core",
+        "satisfies": [
+          "00043"
+        ],
+        "status": "approved",
+        "note": "2026-09-30 hai 表示此項「可以抵免」，暫以學分抵免計。但申請書壹、二把表 C 寫成「僅申請學分認列」——若核定文件寫的是認列，則免修不給學分，畢業學分要少算 3 分。請對照核定公文確認。"
+      },
+      {
+        "table": "C",
+        "type": "認列",
+        "mode": "credit",
+        "modeConfirmed": false,
+        "from": "普通數學",
+        "credits": 3,
+        "bucket": "elec_free",
+        "status": "rejected"
+      },
+      {
+        "table": "C",
+        "type": "認列",
+        "mode": "credit",
+        "modeConfirmed": false,
+        "from": "微積分",
+        "credits": 3,
+        "bucket": "elec_free",
+        "status": "rejected"
+      },
+      {
+        "table": "C",
+        "type": "認列",
+        "mode": "credit",
+        "modeConfirmed": false,
+        "from": "生物學",
+        "credits": 2,
+        "bucket": "elec_free",
+        "status": "rejected"
+      },
+      {
+        "table": "C",
+        "type": "認列",
+        "mode": "credit",
+        "modeConfirmed": false,
+        "from": "法文（一）",
+        "credits": 6,
+        "bucket": "elec_free",
+        "status": "rejected"
+      },
+      {
+        "table": "C",
+        "type": "認列",
+        "mode": "credit",
+        "modeConfirmed": false,
+        "from": "西洋文學概論",
+        "credits": 3,
+        "bucket": "elec_free",
+        "status": "rejected"
+      },
+      {
+        "table": "C",
+        "type": "認列",
+        "mode": "credit",
+        "modeConfirmed": false,
+        "from": "英文閱讀與會話",
+        "credits": 4,
+        "bucket": "elec_free",
+        "status": "rejected"
+      },
+      {
+        "table": "C",
+        "type": "認列",
+        "mode": "credit",
+        "modeConfirmed": false,
+        "from": "英美文學作品導讀",
+        "credits": 2,
+        "bucket": "elec_free",
+        "status": "rejected"
+      },
+      {
+        "table": "C",
+        "type": "認列",
+        "mode": "credit",
+        "modeConfirmed": false,
+        "from": "英語語音學",
+        "credits": 4,
+        "bucket": "elec_free",
+        "status": "rejected"
+      },
+      {
+        "table": "C",
+        "type": "認列",
+        "mode": "credit",
+        "modeConfirmed": false,
+        "from": "英文文法與習作",
+        "credits": 4,
+        "bucket": "elec_free",
+        "status": "rejected"
+      },
+      {
+        "table": "C",
+        "type": "認列",
+        "mode": "credit",
+        "modeConfirmed": false,
+        "from": "管樂合奏（一）",
+        "credits": 1,
+        "bucket": "elec_free",
+        "status": "rejected"
+      },
+      {
+        "table": "C",
+        "type": "認列",
+        "mode": "credit",
+        "modeConfirmed": false,
+        "from": "生理學",
+        "credits": 2,
+        "bucket": "elec_free",
+        "status": "rejected",
+        "note": "與本校生理心理學分屬不同學科，不主張抵免，僅申請外系自由選修認列"
+      }
+    ],
+    "decided": "2026-09-30 確認核定結果"
   },
-
   "terms": [
     {
-      "id": "1151", "label": "大二上", "year": 2, "term": "fall", "state": "current",
-      "source": "2026-09-08 選課系統「已選上課程」清單，共 10 門 22 學分",
+      "id": "1151",
+      "label": "大二上",
+      "year": 2,
+      "term": "fall",
+      "state": "current",
+      "source": "2026-09-30 依 hai 提供的實際選課：10 門 25 學分（另加 0 學分導師時間）",
       "courses": [
-        { "code": "01025", "status": "confirmed", "officialCode": "D390201025", "teacher": "蔡群瑞", "room": "ES801", "slot": "二 D2-D4" },
-        { "code": "00007-1", "status": "confirmed", "officialCode": "DLT3900007", "teacher": "吳明峰", "room": "ES801", "slot": "一 D5-D6" },
-        { "code": "FL-3", "status": "confirmed", "name": "外國語文（基礎德文）", "officialCode": "DFTEN00766A", "teacher": "趙崇任", "room": "LB101", "slot": "二 D5-D6", "note": "開課單位 FT-非英文。計入外國語文 8 學分的第 3 段" },
-        { "code": "PE2-1", "status": "confirmed", "name": "TRX 懸吊訓練", "officialCode": "DATP234362A", "teacher": "魏家勁", "slot": "一 D7-D8", "note": "開課單位「體育二以上必」。114 新制大二體育每學期 1 學分，計入畢業學分" },
-        { "code": "X-電腦應用", "status": "confirmed", "officialCode": "DNTI804844A", "teacher": "劉富容", "room": "SF337", "slot": "二 D7-D8", "note": "通識，開課單位資訊科技" },
-        { "code": "02795", "status": "confirmed", "officialCode": "D390202795", "teacher": "蔡春美", "slot": "三 D5-D6", "note": "導師時間，0 學分" },
-        { "code": "33312", "status": "confirmed", "officialCode": "D390133312", "teacher": "邱倚璿", "room": "ES801", "slot": "四 D2-D4", "note": "遠距課程" },
-        { "code": "36787", "status": "confirmed", "officialCode": "D390136787", "teacher": "王思峯", "room": "ES801", "slot": "四 D5-D7", "note": "遠距＋程式設計課程" },
-
-        { "code": "02222-1", "status": "confirmed", "dropIf": "planA", "officialCode": "D390102222", "teacher": "杜秉叡", "room": "ES401", "slot": "三 D2-D4",
-          "note": "抵免核准的話這門不用修，週三同時段改修社會學。課綱標示第 1 週停課" },
-        { "code": "35959", "status": "confirmed", "dropIf": "planA", "officialCode": "D390235959", "teacher": "洪屹傑", "room": "ES302", "slot": "五 D5-D7",
-          "note": "唯一的選修。抵免核准就退選，把學分讓給心理學實驗法與心理測驗" },
-
-        { "code": "01199", "status": "planA", "teacher": "何東洪", "room": "SF237", "slot": "三 D2-D4",
-          "note": "抵免核准後週三改修這門（與統計學同時段二選一）。與經濟學擇一認列核心課程" },
-
-        { "code": "07943", "status": "pending_add", "teacher": "黃揚名", "room": "SF237", "slot": "一 D2-D4",
-          "note": "擋修（統計學 6 學分）系主任已放行但選課系統仍擋，目前未選上。抵免核准即加選；開學第 1 週不論結果都先去上課" },
-        { "code": "01190", "status": "pending_add", "teacher": "高玉靜", "room": "SF237", "slot": "五 D2-D4",
-          "note": "同上，開學第 1 週不論結果都先去上課" }
+        {
+          "code": "07943",
+          "status": "confirmed",
+          "teacher": "黃揚名",
+          "room": "SF237",
+          "slot": "一 D2-D4"
+        },
+        {
+          "code": "00007-1",
+          "status": "confirmed",
+          "officialCode": "DLT3900007",
+          "teacher": "吳明峰",
+          "room": "ES801",
+          "slot": "一 D5-D6"
+        },
+        {
+          "code": "PE2-1",
+          "status": "confirmed",
+          "name": "TRX 懸吊訓練",
+          "officialCode": "DATP234362A",
+          "teacher": "魏家勁",
+          "slot": "一 D7-D8",
+          "note": "開課單位「體育二以上必」。114 新制大二體育每學期 1 學分，計入畢業學分"
+        },
+        {
+          "code": "01025",
+          "status": "confirmed",
+          "officialCode": "D390201025",
+          "teacher": "蔡群瑞",
+          "room": "ES801",
+          "slot": "二 D2-D4"
+        },
+        {
+          "code": "FL-3",
+          "status": "confirmed",
+          "name": "外國語文（基礎德文）",
+          "officialCode": "DFTEN00766A",
+          "teacher": "趙崇任",
+          "room": "LB101",
+          "slot": "二 D5-D6",
+          "note": "開課單位 FT-非英文。計入外國語文 8 學分的第 3 段"
+        },
+        {
+          "code": "X-電腦應用",
+          "status": "confirmed",
+          "officialCode": "DNTI804844A",
+          "teacher": "劉富容",
+          "room": "SF337",
+          "slot": "二 D7-D8",
+          "note": "通識，開課單位資訊科技"
+        },
+        {
+          "code": "01199",
+          "status": "confirmed",
+          "teacher": "何東洪",
+          "room": "SF237",
+          "slot": "三 D2-D4",
+          "note": "與經濟學擇一認列核心課程。全學期無期中期末考，以分組報告評量"
+        },
+        {
+          "code": "02795",
+          "status": "confirmed",
+          "officialCode": "D390202795",
+          "teacher": "蔡春美",
+          "slot": "三 D5-D6",
+          "note": "導師時間，0 學分"
+        },
+        {
+          "code": "33312",
+          "status": "confirmed",
+          "officialCode": "D390133312",
+          "teacher": "邱倚璿",
+          "room": "ES801",
+          "slot": "四 D2-D4",
+          "note": "遠距課程"
+        },
+        {
+          "code": "36787",
+          "status": "confirmed",
+          "officialCode": "D390136787",
+          "teacher": "王思峯",
+          "room": "ES801",
+          "slot": "四 D5-D7",
+          "note": "遠距＋程式設計課程"
+        },
+        {
+          "code": "01190",
+          "status": "confirmed",
+          "teacher": "高玉靜",
+          "room": "SF237",
+          "slot": "五 D2-D4"
+        }
       ]
     },
-    { "id": "1152", "label": "大二下", "year": 2, "term": "spring", "state": "planned", "courses": [
-      { "code": "04486", "status": "confirmed", "note": "規劃 115-2 接續修，無須抵免" }
-    ] },
-    { "id": "1161", "label": "大三上", "year": 3, "term": "fall",   "state": "planned", "courses": [] },
-    { "id": "1162", "label": "大三下", "year": 3, "term": "spring", "state": "planned", "courses": [] },
-    { "id": "1171", "label": "大四上", "year": 4, "term": "fall",   "state": "planned", "courses": [] },
-    { "id": "1172", "label": "大四下", "year": 4, "term": "spring", "state": "planned", "courses": [] }
+    {
+      "id": "1152",
+      "label": "大二下",
+      "year": 2,
+      "term": "spring",
+      "state": "planned",
+      "courses": [
+        {
+          "code": "04486",
+          "status": "confirmed",
+          "note": "規劃 115-2 接續修，無須抵免"
+        }
+      ]
+    },
+    {
+      "id": "1161",
+      "label": "大三上",
+      "year": 3,
+      "term": "fall",
+      "state": "planned",
+      "courses": []
+    },
+    {
+      "id": "1162",
+      "label": "大三下",
+      "year": 3,
+      "term": "spring",
+      "state": "planned",
+      "courses": []
+    },
+    {
+      "id": "1171",
+      "label": "大四上",
+      "year": 4,
+      "term": "fall",
+      "state": "planned",
+      "courses": []
+    },
+    {
+      "id": "1172",
+      "label": "大四下",
+      "year": 4,
+      "term": "spring",
+      "state": "planned",
+      "courses": []
+    }
   ],
-
   "extraCourses": [
-    { "code": "X-電腦應用", "name": "電腦應用", "credits": 2, "bucket": "hol_ge", "kind": "通", "offered": ["fall"], "code_hint": "DNTI804844A", "note": "115-1 課綱：通識 2 學分，開課單位資訊科技，劉富容，週二 D7-D8/SF337，無擋修。通識領域別（NT/PT/ST/DT）課綱未載明，暫依開課單位推定為自然與科技" }
+    {
+      "code": "X-電腦應用",
+      "name": "電腦應用",
+      "credits": 2,
+      "bucket": "hol_ge",
+      "kind": "通",
+      "offered": [
+        "fall"
+      ],
+      "code_hint": "DNTI804844A",
+      "note": "115-1 課綱：通識 2 學分，開課單位資訊科技，劉富容，週二 D7-D8/SF337，無擋修。通識領域別（NT/PT/ST/DT）課綱未載明，暫依開課單位推定為自然與科技"
+    }
   ]
 }
